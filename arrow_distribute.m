@@ -5,21 +5,24 @@ function [arrP, arrDir] = arrow_distribute(X, opt , val)
         return
     end
 
-    n = length(X(1,:));
-
-    arrP = zeros(N ,2);
-    arrDir = zeros(N ,2); 
+    n = length(X(:,1));
 
     dists = zeros(n, 1);
     for i = 2:n
         dists(i) = dists(i - 1) + norm( X(i, :) - X(i - 1, :) );
     end
 
+
     if strcmp(opt, 'N') 
-        step = dists(n) / N;
+        step = dists(n) / val;
+        N = val;
     elseif strcmp(opt, 'step')
-        N = floor(dists(n) / step);
+        N = floor(dists(n) / val);
+        step = val;
     end
+
+    arrP = zeros(N ,2);
+    arrDir = zeros(N ,2); 
 
     intervalID = 2;
     for i = 1:N
@@ -35,4 +38,4 @@ function [arrP, arrDir] = arrow_distribute(X, opt , val)
     end
 
 
-end
+end 
