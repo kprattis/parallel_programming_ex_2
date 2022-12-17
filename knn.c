@@ -3,14 +3,14 @@
 #include <stdlib.h>
 #include "cblas.h"
 
-knnresult *init_knnresult(int k, int m){
+knnresult init_knnresult(int k, int m){
     
-    knnresult *knn = malloc(sizeof(knnresult));
+    knnresult knn;
 
-    knn->k = k;
-    knn->m = m;
-    knn->ndist = (double *) malloc(m * k * sizeof(double));
-    knn->nidx = (int *) malloc(m * k * sizeof(int));
+    knn.k = k;
+    knn.m = m;
+    knn.ndist = (double *) malloc(m * k * sizeof(double));
+    knn.nidx = (int *) malloc(m * k * sizeof(int));
     
     return knn;
 }
@@ -26,7 +26,7 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
         
     double *dist = (double *) calloc(m * n, sizeof(double)); // [m by n]
 
-    knnresult *knn = init_knnresult(k, m);
+    knnresult knn = init_knnresult(k, m);
 
     //calculate distances matrix dist
 
@@ -60,6 +60,8 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     print_arr(dist, m, n);
 
     free(dist);
+
+    return knn;
 }
 
 void print_arr(double *arr, int a, int b){

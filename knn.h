@@ -20,7 +20,7 @@ typedef struct knnresult{
 */
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k);
 
-knnresult *init_knnresult(int k, int m);
+knnresult init_knnresult(int k, int m);
 void free_knnresults(knn);
 
 void print_arr(double *arr, int a, int b);

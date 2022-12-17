@@ -28,5 +28,16 @@ int main(int argc, char *argv[]){
         }
     }
 
+    printf("Query X:\n");
+    print_arr(X, m, d);
+
+    printf("Corpus Y:\n");
+    print_arr(Y, n, d);
+
+    knnresult knn = kNN(X, Y, n, m, d, k);
+
+    free_knnresults(knn);
+    free(X);
+    free(Y);
     return 0;
 }
