@@ -3,21 +3,23 @@ include $(CBLAS)/Makefile.in
 
 OBJ = obj
 BIN = bin
+SRC = src
+INC = inc
 
-OUT = $(BIN)/knn
+SEQ = $(BIN)/knn_seq
 
-all: $(OUT)
+all: $(SEQ)
 
-run: $(OUT)
-	./$(OUT)
+run: $(SEQ)
+	./$(SEQ)
 
-$(OUT): $(OBJ)/knn.o $(OBJ)/main.o
+$(SEQ): $(OBJ)/knn.o $(OBJ)/main.o
 	mkdir -p $(BIN)
 	$(LOADER) -o $@ $^ $(CBLIB) $(BLLIB)
 	
-$(OBJ)/%.o: %.c
+$(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
-	$(CC) -c $(CFLAGS) -o $@ -I. $^
+	$(CC) -c $(CFLAGS) -o $@ -I$(INC) $^
 
 clean:
-	rm -f $(OBJ)/*.o $(OUT)
+	rm -f $(OBJ)/*.o $(SEQ)
