@@ -80,26 +80,31 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     //printf("distane matrix is: \n");
     //print_arr(dist, m, n, DOUBLE);
 
+    k_select(&knn, dist, m, n, k);
 
+    free(dist);
+
+    return knn;
+}
+
+void k_select(knnresult *knn, double *dist, int m, int n, int k){
     int taken_num, pos;
     bool pos_found;
     for(int i = 0; i < m; i++){
-        knn.nidx[i * k] = 0;
-        knn.ndist[i * k] = dist[i * n];
+        knn->nidx[i * k] = 0;
+        knn->ndist[i * k] = dist[i * n];
         taken_num = 1;
         for(int j = 1; j < n; j++){       
             pos = 0;
             pos_found = false;
             while(pos < taken_num){
                     
-                if(dist[i * n + j] < knn.ndist[i * k + pos]){
-                    shift(knn.ndist + i*k, k, pos, taken_num, DOUBLE);
-                    shift(knn.nidx + i*k, k, pos, taken_num, INT);
+                if(dist[i * n + j] < knn->ndist[i * k + pos]){
+                    shift(knn->ndist + i*k, k, pos, taken_num, DOUBLE);
+                    shift(knn->nidx + i*k, k, pos, taken_num, INT); 
 
-   
-
-                    knn.nidx[i * k + pos] = j;
-                    knn.ndist[i * k + pos] = dist[i * n + j];
+                    knn->nidx[i * k + pos] = j;
+                    knn->ndist[i * k + pos] = dist[i * n + j];
                     
                     pos_found = true;
                     taken_num = (taken_num + 1 < k) ? taken_num + 1 : k;
@@ -109,18 +114,13 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
             }
 
             if(!pos_found && taken_num < k){
-                knn.nidx[i * k + taken_num] = j;
-                knn.ndist[i * k + taken_num] = dist[i * n + j];
+                knn->nidx[i * k + taken_num] = j;
+                knn->ndist[i * k + taken_num] = dist[i * n + j];
                 taken_num = (taken_num + 1 < k) ? taken_num + 1 : k;
             }
             
         }
     }
-    
-
-    free(dist);
-
-    return knn;
 }
 
 void print_arr(void *arr, int a, int b, type t){

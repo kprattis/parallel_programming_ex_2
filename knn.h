@@ -23,6 +23,8 @@ typedef struct knnresult{
 */
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k);
 
+void k_select(knnresult *knn, double *dist, int m, int n, int k);
+
 knnresult init_knnresult(int k, int m);
 void free_knnresult(knnresult knn);
 
