@@ -1,3 +1,6 @@
+typedef enum bool {false = 0, true = 1} bool;
+typedef enum type {INT, DOUBLE} type;
+
 // Definition of the kNN result struct
 typedef struct knnresult{
   int    * nidx;    //!< Indices (0-based) of nearest neighbors [m-by-k]
@@ -21,6 +24,7 @@ typedef struct knnresult{
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k);
 
 knnresult init_knnresult(int k, int m);
-void free_knnresults(knn);
+void free_knnresult(knnresult knn);
 
-void print_arr(double *arr, int a, int b);
+void print_arr(void *arr, int a, int b, type t);
+int shift(void *arr, int size, int start, int end, type t);
