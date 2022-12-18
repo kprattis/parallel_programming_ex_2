@@ -3,6 +3,32 @@
 #include <stdlib.h>
 #include "cblas.h"
 
+void print_arr(void *arr, int a, int b, type t){
+    
+    switch (t){
+        case INT:
+            
+            for(int i = 0; i < a; i++){
+                for(int j = 0; j < b; j++){
+                    printf("%d ", ((int *)arr)[i * b + j]);
+                }
+                printf("\n");
+            }
+            break;
+        
+        case DOUBLE:
+
+            for(int i = 0; i < a; i++){
+                for(int j = 0; j < b; j++){
+                    printf("%.3lf ", ((double *)arr)[i * b + j]);
+                }
+                printf("\n");
+            }
+            break;
+    }
+    
+}
+
 knnresult init_knnresult(int k, int m){
     
     knnresult knn;
@@ -67,7 +93,7 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     }
 
     dist[0] += temp;
-    // end of copy section
+    // End of copy section
 
     //printf("distane matrix is: \n");
     //print_arr(dist, m, n, DOUBLE);
@@ -121,32 +147,6 @@ void k_select(knnresult *knn, double *dist, int m, int n, int k){
             
         }
     }
-}
-
-void print_arr(void *arr, int a, int b, type t){
-    
-    switch (t){
-        case INT:
-            
-            for(int i = 0; i < a; i++){
-                for(int j = 0; j < b; j++){
-                    printf("%d ", ((int *)arr)[i * b + j]);
-                }
-                printf("\n");
-            }
-            break;
-        
-        case DOUBLE:
-
-            for(int i = 0; i < a; i++){
-                for(int j = 0; j < b; j++){
-                    printf("%.3lf ", ((double *)arr)[i * b + j]);
-                }
-                printf("\n");
-            }
-            break;
-    }
-    
 }
 
 int shift(void *arr, int size, int start, int end, type t){
