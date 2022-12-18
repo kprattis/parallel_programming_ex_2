@@ -1,13 +1,23 @@
 CBLAS = ~/Desktop/CBLAS
 include $(CBLAS)/Makefile.in
 
-all: knn
+OBJ = obj
+BIN = bin
 
-knn: knn.o main.o
+OUT = $(BIN)/knn
+
+all: $(OUT)
+
+run: $(OUT)
+	./$(OUT)
+
+$(OUT): $(OBJ)/knn.o $(OBJ)/main.o
+	mkdir -p $(BIN)
 	$(LOADER) -o $@ $^ $(CBLIB) $(BLLIB)
-
-%.o: %.c
+	
+$(OBJ)/%.o: %.c
+	mkdir -p $(OBJ)
 	$(CC) -c $(CFLAGS) -o $@ -I. $^
-   
+
 clean:
-	rm -f *.o knn
+	rm -f $(OBJ)/*.o $(OUT)
