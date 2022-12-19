@@ -20,7 +20,7 @@ void shift_select(knnresult *knn, double *dist, int m, int n, int k){
                     knn->ndist[i * k + pos] = dist[i * n + j];
                     
                     pos_found = true;
-                    taken_num = (taken_num + 1 < k) ? taken_num + 1 : k;
+                    taken_num = min(taken_num + 1, k);
                     break;
                 }
                 pos ++;
@@ -29,7 +29,7 @@ void shift_select(knnresult *knn, double *dist, int m, int n, int k){
             if(!pos_found && taken_num < k){
                 knn->nidx[i * k + taken_num] = j;
                 knn->ndist[i * k + taken_num] = dist[i * n + j];
-                taken_num = (taken_num + 1 < k) ? taken_num + 1 : k;
+                taken_num = min(taken_num + 1, k);
             }
             
         }

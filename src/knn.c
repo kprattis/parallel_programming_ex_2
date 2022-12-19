@@ -3,110 +3,67 @@
 #include <stdlib.h>
 #include "cblas.h"
 
-void print_arr(void *arr, int a, int b, type t){
-    
-    switch (t){
-        case INT:
-            
-            for(int i = 0; i < a; i++){
-                for(int j = 0; j < b; j++){
-                    printf("%d ", ((int *)arr)[i * b + j]);
-                }
-                printf("\n");
-            }
-            break;
-        
-        case DOUBLE:
-
-            for(int i = 0; i < a; i++){
-                for(int j = 0; j < b; j++){
-                    printf("%.3lf ", ((double *)arr)[i * b + j]);
-                }
-                printf("\n");
-            }
-            break;
-    }
-    
-}
-
-knnresult init_knnresult(int k, int m){
-    
-    knnresult knn;
-
-    knn.k = k;
-    knn.m = m;
-    knn.ndist = (double *) malloc(m * k * sizeof(double));
-    knn.nidx = (int *) malloc(m * k * sizeof(int));
-    
-    return knn;
-}
-
-void free_knnresult(knnresult knn){
-    free(knn.ndist);
-    free(knn.nidx);
-}
-
-
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
         
-    double *dist = (double *) calloc(m * n, sizeof(double)); // [m by n]
+    double *dist = (double *) malloc(m * BLOCKSIZE * sizeof(double)); // [m by Bloocksize]
 
     knnresult knn = init_knnresult(k, m);
 
-    //calculate distances matrix dist
+    int startid, endid, dist_size;
+    //block matrix Y
+    for(int b = 0; b < n; b += BLOCKSIZE){
+        startid = b;
+        endid = min(b + BLOCKSIZE, n);
+        dist_size = endid - startid;
 
-    //Create X o X vector
-    for(int i = 1; i < m; i++){
-        for(int j = 0; j < d; j++){
-            dist[i * n] += X[i * d + j] * X[i * d + j];
+        //Create X o X vector
+        for(int i = 1; i < m; i++){
+            dist[i * dist_size] = euclidean_norm(X + i*d, d);
         }
-    }
-    
-    //Create Y o Y vector
-    for(int i = 1; i < n; i++){
-        for(int j = 0; j < d; j++){
-            dist[i] += Y[i * d + j] * Y[i * d + j];
+
+        //Create Y o Y vector
+        for(int i = 1; i < dist_size; i++){
+            dist[i] = euclidean_norm(Y + (i + startid)*d, d);
         }
-    }
+        //printf("distane matrix is: \n");
+        //print_arr(dist, m, dist_size, DOUBLE);
 
-    // Copy XoX to all columns and YoY to all rows of dist
-    for(int i = 1; i < m; i++){
-        for(int j = 1; j < n; j++){
-            dist[i * n + j] = dist[j] + dist[i * n];  
+        // Copy XoX to all columns and YoY to all rows of dist
+        for(int i = 1; i < m; i++){
+            for(int j = 1; j < dist_size; j++){
+                dist[i * dist_size + j] = dist[j] + dist[i * dist_size];  
+            }
         }
+
+        //Fix first row and column
+        dist[0] = euclidean_norm(Y + startid, d);
+        
+        for(int i = 1; i < m; i++){
+            dist[i * dist_size] = dist[0]; 
+        }
+
+        double temp = dist[0];
+        dist[0] = euclidean_norm(X, d);
+        
+        for(int i = 1; i < dist_size; i++){
+            dist[i] += dist[0];
+        }
+        dist[0] += temp;
+        // End of copy section
+
+        printf("distane matrix is: \n");
+        print_arr(dist, m, dist_size, DOUBLE);
+
+        cblas_dgemm(CblasRowMajor, CblasNoTrans,
+                    CblasTrans, m, dist_size,
+                    d, -2.0, X,
+                    d, Y + startid, d, 1.0 , dist, dist_size);
+
+        //printf("distane matrix is: \n");
+        //print_arr(dist, m, dist_size, DOUBLE);
+
+        shift_select(&knn, dist, m, dist_size, k);
     }
-
-    for(int i = 0; i < d; i++)
-        dist[0] += Y[i] * Y[i];
-
-    for(int i = 1; i < m; i++){
-        dist[i * n] += dist[0]; 
-    }
-
-    double temp = dist[0];
-    dist[0] = 0;
-    for(int i = 0; i < d; i++)
-        dist[0] += X[i] * X[i];
-
-    for(int i = 1; i < n; i++){
-        dist[i] += dist[0]; 
-    }
-
-    dist[0] += temp;
-    // End of copy section
-
-    //printf("distane matrix is: \n");
-    //print_arr(dist, m, n, DOUBLE);
-
-    cblas_dgemm(CblasRowMajor, CblasNoTrans,
-                 CblasTrans, m, n,
-                 d, -2.0, X,
-                 d, Y, d, 1.0 , dist, n);
-
-    //printf("distane matrix is: \n");
-    //print_arr(dist, m, n, DOUBLE);
-
-    shift_select(&knn, dist, m, n, k);
 
     free(dist);
 

@@ -4,13 +4,16 @@
 #include <time.h>
 #include <math.h>
 
+int BLOCKSIZE;
+
 int main(int argc, char *argv[]){
 
-    int m = 2;
-    int n = 5;
+    int m = 1;
+    int n = 11;
     int d = 1;
-    
-    int k = 3;
+
+    int k = 2;
+    BLOCKSIZE = d*k;
 
     double *X = malloc(m * d * sizeof(double));
     double *Y = malloc(n * d * sizeof(double));
