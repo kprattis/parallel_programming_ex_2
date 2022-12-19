@@ -33,9 +33,9 @@ void print_arr(void *arr, int a, int b, type t);
 
 
 //functions to select k smallest numbers
-void k_select(knnresult *knn, double *dist, int m, int n, int k);
+void shift_select(knnresult *knn, double *dist, int m, int n, int k);
 int shift(void *arr, int size, int start, int end, type t);
 
-void quickselect();
+void k_select();
 void partition();
 void merge();

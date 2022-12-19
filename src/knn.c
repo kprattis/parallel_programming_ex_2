@@ -106,14 +106,14 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     //printf("distane matrix is: \n");
     //print_arr(dist, m, n, DOUBLE);
 
-    k_select(&knn, dist, m, n, k);
+    shift_select(&knn, dist, m, n, k);
 
     free(dist);
 
     return knn;
 }
 
-void k_select(knnresult *knn, double *dist, int m, int n, int k){
+void shift_select(knnresult *knn, double *dist, int m, int n, int k){
     int taken_num, pos;
     bool pos_found;
     for(int i = 0; i < m; i++){
