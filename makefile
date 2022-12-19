@@ -13,7 +13,7 @@ all: $(SEQ)
 run: $(SEQ)
 	./$(SEQ)
 
-$(SEQ): $(OBJ)/knn.o $(OBJ)/main.o
+$(SEQ): $(OBJ)/knn.o $(OBJ)/main.o $(OBJ)/shift_select.o
 	mkdir -p $(BIN)
 	$(LOADER) -o $@ $^ $(CBLIB) $(BLLIB)
 	
