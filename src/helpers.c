@@ -71,3 +71,31 @@ double euclidean_norm(double *vec, int d){
 int min(int a, int b){
     return (a < b) ? a : b;
 }
+
+double * regular_grid(int dim, double start[], double end[], double step[], int *s){
+    
+    int *dim_size = (int *) malloc(dim * sizeof(int));
+    int total_size = 1;
+
+    for(int d = 0; d < dim; d++){
+        dim_size[d] = (int) (end[d] - start[d])/step[d] + 1;
+        total_size = dim_size[d] * total_size;
+    }
+
+    *s = total_size;
+
+    double *X = (double *) malloc(total_size * dim * sizeof(double));
+    int index;
+    
+    for(int i = 0; i < total_size; i++){
+        index = i;
+        for(int d = 0; d < dim; d++){
+            X[i * dim + d] =  (index % dim_size[d]) * step[d] + start[d];
+            index = index / dim_size[d];
+        }
+    }
+
+    free(dim_size);
+
+    return X;
+}

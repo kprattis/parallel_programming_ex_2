@@ -35,6 +35,7 @@ void free_knnresult(knnresult knn);
 void print_arr(void *arr, int a, int b, type t);
 double euclidean_norm(double *vec, int d);
 int min(int a, int b);
+double * regular_grid(int dim, double start[], double end[], double step[], int *s);
 void print_results(knnresult knn);
 void randarr(double *X, int a, int b);
 

@@ -18,13 +18,20 @@ int main(int argc, char *argv[]){
 
     BLOCKSIZE = n/10;
 
+    double start[] = {-2.0, -2.0, -2.0};
+    double end[] = {2.0, 2.0, 2.0};
+    double step[] = {1.0, 1.0, 0.5};
 
-    double *X = malloc(m * d * sizeof(double));
-    double *Y = malloc(n * d * sizeof(double));
+    double *X = regular_grid(d, start, end, step, &m);//malloc(m * d * sizeof(double));
     
+    n = m;
+    printf("%d %d %d\n",m, n, d);
+    double *Y = X;
+    
+    //print_arr(X, m, d, DOUBLE);
     //init X, Y
-    randarr(X, m, d);
-    randarr(Y, n, d);
+    //randarr(X, m, d);
+    //randarr(Y, n, d);
 
     
     //print arrays
@@ -51,6 +58,6 @@ int main(int argc, char *argv[]){
     
     free_knnresult(knn);
     free(X);
-    free(Y);
+    //free(Y);
     return 0;
 }
