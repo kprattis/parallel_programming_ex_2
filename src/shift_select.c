@@ -1,38 +1,35 @@
 #include "knn.h"
 
-void shift_select(knnresult *knn, double *dist, int m, int n, int k){
-    int taken_num, pos;
+void shift_select(int *nidx, double *ndist, int n_found ,double *dist, int n, int k, int global_id_offset){
+    int pos;
     bool pos_found;
-    for(int i = 0; i < m; i++){
-        knn->nidx[i * k] = 0;
-        knn->ndist[i * k] = dist[i * n];
-        taken_num = 1;
-        for(int j = 1; j < n; j++){       
-            pos = 0;
-            pos_found = false;
-            while(pos < taken_num){
-                    
-                if(dist[i * n + j] < knn->ndist[i * k + pos]){
-                    shift(knn->ndist + i*k, k, pos, taken_num, DOUBLE);
-                    shift(knn->nidx + i*k, k, pos, taken_num, INT); 
 
-                    knn->nidx[i * k + pos] = j;
-                    knn->ndist[i * k + pos] = dist[i * n + j];
-                    
-                    pos_found = true;
-                    taken_num = min(taken_num + 1, k);
-                    break;
-                }
-                pos ++;
-            }
+    for(int j = 0; j < n; j++){       
+        pos = 0;
+        pos_found = false;
+        
+        while(pos < n_found){
+                
+            if(dist[j] < ndist[pos]){
+                shift(ndist, k, pos, n_found, DOUBLE);
+                shift(nidx, k, pos, n_found, INT); 
 
-            if(!pos_found && taken_num < k){
-                knn->nidx[i * k + taken_num] = j;
-                knn->ndist[i * k + taken_num] = dist[i * n + j];
-                taken_num = min(taken_num + 1, k);
+                nidx[pos] = j + global_id_offset;
+                ndist[pos] = dist[j];
+                
+                pos_found = true;
+                n_found = min(n_found + 1, k);
+                break;
             }
-            
+            pos ++;
         }
+
+        if(!pos_found && n_found < k){
+            nidx[n_found] = j + global_id_offset;
+            ndist[n_found] = dist[j];
+            n_found = min(n_found + 1, k);
+        }
+        
     }
 }
 

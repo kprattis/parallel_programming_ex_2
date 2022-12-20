@@ -9,7 +9,7 @@ void print_arr(void *arr, int a, int b, type t){
             
             for(int i = 0; i < a; i++){
                 for(int j = 0; j < b; j++){
-                    printf("%d ", ((int *)arr)[i * b + j]);
+                    printf("%6d ", ((int *)arr)[i * b + j]);
                 }
                 printf("\n");
             }
@@ -19,13 +19,29 @@ void print_arr(void *arr, int a, int b, type t){
 
             for(int i = 0; i < a; i++){
                 for(int j = 0; j < b; j++){
-                    printf("%.3lf ", ((double *)arr)[i * b + j]);
+                    printf("%7.2lf ", ((double *)arr)[i * b + j]);
                 }
                 printf("\n");
             }
             break;
     }
     
+}
+
+void randarr(double *X, int a, int b){
+    for(int i = 0; i < a; i++){
+        for(int j = 0; j < b; j++){
+            X[i * b + j] = ((int) rand()) % 10 * 1.0;
+        }
+    }
+}
+
+void print_results(knnresult knn){
+    printf("The %d nn ids for each query point are:\n", knn.k);
+    print_arr(knn.nidx, knn.m, knn.k, INT);
+
+    printf("With distances:\n");
+    print_arr(knn.ndist, knn.m, knn.k, DOUBLE);
 }
 
 knnresult init_knnresult(int k, int m){
@@ -46,7 +62,7 @@ void free_knnresult(knnresult knn){
 }
 
 double euclidean_norm(double *vec, int d){
-    double norm;
+    double norm = 0.0;
     for(int i = 0; i < d; i++)
         norm += vec[i] * vec[i];
     return norm;

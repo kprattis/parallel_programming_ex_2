@@ -35,7 +35,9 @@ void free_knnresult(knnresult knn);
 void print_arr(void *arr, int a, int b, type t);
 double euclidean_norm(double *vec, int d);
 int min(int a, int b);
+void print_results(knnresult knn);
+void randarr(double *X, int a, int b);
 
 //functions to select k smallest numbers
-void shift_select(knnresult *knn, double *dist, int m, int n, int k);
+void shift_select(int *nidx, double *ndist, int n_found ,double *dist, int n, int k, int global_id_offset);
 int shift(void *arr, int size, int start, int end, type t);
