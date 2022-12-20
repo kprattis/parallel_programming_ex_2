@@ -9,11 +9,11 @@ int main(int argc, char *argv[]){
 
     srand(time(NULL));
 
-    int m = 2;
-    int n = 4;
-    int d = 1;
+    int m = 200;
+    int n = 400;
+    int d = 3;
 
-    int k = 1;
+    int k = 10;
 
     BLOCKSIZE = n;
 
@@ -27,16 +27,17 @@ int main(int argc, char *argv[]){
 
     
     //print arrays
+    /*
     printf("Query X:\n");
     print_arr(X, m, d, DOUBLE);
 
     printf("Corpus Y:\n");
     print_arr(Y, n, d, DOUBLE);
-    
+    */
     knnresult knn = kNN(X, Y, n, m, d, k);
 
     //print results
-    //print_results(knn);
+    print_results(knn);
     
     free_knnresult(knn);
     free(X);

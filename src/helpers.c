@@ -37,7 +37,7 @@ void randarr(double *X, int a, int b){
 }
 
 void print_results(knnresult knn){
-    printf("The %d nn ids for each query point are:\n", knn.k);
+    printf("The %d nearest neighbors id's for each query point are:\n", knn.k);
     print_arr(knn.nidx, knn.m, knn.k, INT);
 
     printf("With distances:\n");
