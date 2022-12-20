@@ -31,7 +31,7 @@ void print_arr(void *arr, int a, int b, type t){
 void randarr(double *X, int a, int b){
     for(int i = 0; i < a; i++){
         for(int j = 0; j < b; j++){
-            X[i * b + j] = ((int) rand()) % 10 * 1.0;
+            X[i * b + j] = ((int) rand()) % 1000 * 1.0;
         }
     }
 }

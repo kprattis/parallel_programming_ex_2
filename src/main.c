@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/time.h>
 
 int BLOCKSIZE;
 
@@ -9,13 +10,13 @@ int main(int argc, char *argv[]){
 
     srand(time(NULL));
 
-    int m = 200;
-    int n = 400;
+    int m = 5;
+    int n = 10000;
     int d = 3;
 
-    int k = 10;
+    int k = 5;
 
-    BLOCKSIZE = 50;
+    BLOCKSIZE = n/10;
 
 
     double *X = malloc(m * d * sizeof(double));
@@ -34,10 +35,19 @@ int main(int argc, char *argv[]){
     printf("Corpus Y:\n");
     print_arr(Y, n, d, DOUBLE);
     */
-    knnresult knn = kNN(X, Y, n, m, d, k);
+    knnresult knn;
+    
+    struct timeval start_time, end_time;
+    double elapsed_time;
 
+    gettimeofday(&start_time, NULL);
+    knn = kNN(X, Y, n, m, d, k);
+    gettimeofday(&end_time, NULL);
+    elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+
+    printf("time: %lf\n", elapsed_time);
     //print results
-    //print_results(knn);
+    print_results(knn);
     
     free_knnresult(knn);
     free(X);
