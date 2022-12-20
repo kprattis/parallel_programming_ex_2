@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
 
     int k = 10;
 
-    BLOCKSIZE = n;
+    BLOCKSIZE = 50;
 
 
     double *X = malloc(m * d * sizeof(double));
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]){
     knnresult knn = kNN(X, Y, n, m, d, k);
 
     //print results
-    print_results(knn);
+    //print_results(knn);
     
     free_knnresult(knn);
     free(X);
