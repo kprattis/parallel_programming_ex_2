@@ -1,26 +1,24 @@
 #include "knn.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <sys/time.h>
+
 
 int BLOCKSIZE;
 
 int main(int argc, char *argv[]){
 
-    srand(time(NULL));
-
     int m = 5;
     int n = 10000;
     int d = 3;
 
-    int k = 5;
+    int k = 27;
 
     BLOCKSIZE = n/10;
 
     double start[] = {-2.0, -2.0, -2.0};
     double end[] = {2.0, 2.0, 2.0};
-    double step[] = {1.0, 1.0, 0.5};
+    double step[] = {0.1, 0.1, 0.1};
 
     double *X = regular_grid(d, start, end, step, &m);//malloc(m * d * sizeof(double));
     
@@ -29,7 +27,7 @@ int main(int argc, char *argv[]){
     double *Y = X;
     
     //print_arr(X, m, d, DOUBLE);
-    //init X, Y
+    //init X, Y 
     //randarr(X, m, d);
     //randarr(Y, n, d);
 
@@ -54,7 +52,7 @@ int main(int argc, char *argv[]){
 
     printf("time: %lf\n", elapsed_time);
     //print results
-    print_results(knn);
+    //print_results(knn);
     
     free_knnresult(knn);
     free(X);

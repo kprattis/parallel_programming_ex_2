@@ -8,14 +8,17 @@ INC = inc
 
 SEQ = $(BIN)/knn_seq
 
+OBJFILES = $(addprefix $(OBJ)/, $(shell  ls ./$(SRC)/ | sed -E 's/.c$$/.o/g'))  
+
 all: $(SEQ)
 
 run: $(SEQ)
 	./$(SEQ)
 
-$(SEQ): $(OBJ)/knn.o $(OBJ)/main.o $(OBJ)/shift_select.o $(OBJ)/helpers.o
+$(SEQ): $(OBJFILES)
 	mkdir -p $(BIN)
 	$(LOADER) -o $@ $^ $(CBLIB) $(BLLIB)
+	
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
@@ -23,3 +26,4 @@ $(OBJ)/%.o: $(SRC)/%.c
 
 clean:
 	rm -f $(OBJ)/*.o $(SEQ)
+	

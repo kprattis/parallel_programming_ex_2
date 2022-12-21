@@ -35,9 +35,9 @@ void free_knnresult(knnresult knn);
 void print_arr(void *arr, int a, int b, type t);
 double euclidean_norm(double *vec, int d);
 int min(int a, int b);
-double * regular_grid(int dim, double start[], double end[], double step[], int *s);
+double * regular_grid(int dim, double start[], double end[], double step[], int *n_points);
 void print_results(knnresult knn);
-void randarr(double *X, int a, int b);
+double * randarr(int size, double max, double min);
 
 //functions to select k smallest numbers
 void shift_select(int *nidx, double *ndist, int n_found ,double *dist, int n, int k, int global_id_offset);
