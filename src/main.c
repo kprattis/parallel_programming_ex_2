@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
     //randarr(X, m, d);
     //randarr(Y, n, d);
 
+    save_image(X, rows, cols, "../Images/img1.txt");
     
     //print arrays
 

@@ -65,3 +65,23 @@ double euclidean_norm(double *vec, int d){
 int min(int a, int b){
     return (a < b) ? a : b;
 }
+
+void save_image(double *Image, int rows, int cols, char *filename){
+    FILE *f = fopen(filename, "w");
+
+    if(f == NULL){
+        fprintf(stderr, "Could not open the file %s\n", filename);
+        exit(1);
+    }
+
+    u_int8_t pixel; 
+    for(int r = 0; r < rows; r++){
+        fprintf(f, "%u", (u_int8_t) (Image[r * cols] * 255) );
+        for(int c = 1; c < cols; c++){
+            fprintf(f, " %u", (u_int8_t) (Image[r * cols + c] * 255) );
+        }
+        fprintf(f, "\n");
+    }
+
+    fclose(f);
+}
