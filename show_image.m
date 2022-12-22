@@ -1,6 +1,9 @@
-function show_image(filename, imagename)
+function show_image(src, dest)
   colormap gray;
-  A = readmatrix(filename);
+  A = readmatrix(src);
   image(A);
+  if nargin > 1
+    saveas(gcf, dest);
+  end
 
 end
