@@ -36,7 +36,7 @@ int main(int argc, char *argv[]){
     //randarr(X, m, d);
     //randarr(Y, n, d);
 
-    save_image(X, rows, cols, "../Images/img1.txt");
+    //save_image(X, rows, cols, "../Images/img1.txt");
     
     //print arrays
 
@@ -56,7 +56,13 @@ int main(int argc, char *argv[]){
     gettimeofday(&end_time, NULL);
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
 
-    
+    char *name = (char *)malloc(sizeof(char) * 20);
+    for(int i = 0; i < k; i++){
+        sprintf(name, "../Images/img%d.txt", i+1);
+        save_image(X + knn.nidx[i] * d, rows, cols, name);
+    }
+
+
     //print results
     print_results(knn, false);
     printf("time: %lf\n", elapsed_time);
