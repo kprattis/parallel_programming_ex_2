@@ -32,13 +32,17 @@ knnresult init_knnresult(int k, int m);
 void free_knnresult(knnresult knn);
 
 //helpers
+void print_results(knnresult knn, bool print_dist);
 void print_arr(void *arr, int a, int b, type t);
 double euclidean_norm(double *vec, int d);
 int min(int a, int b);
-double * regular_grid(int dim, double start[], double end[], double step[], int *n_points);
-void print_results(knnresult knn);
-double * randarr(int size, double max, double min);
+
 
 //functions to select k smallest numbers
 void shift_select(int *nidx, double *ndist, int n_found ,double *dist, int n, int k, int global_id_offset);
 int shift(void *arr, int size, int start, int end, type t);
+
+//functions to initialize query and corpus
+double * read_MNIST_images(char * filename, int *num_images, int *rows, int *cols);
+double * regular_grid(int dim, double start[], double end[], double step[], int *n_points);
+double * randarr(int size, double max, double min);

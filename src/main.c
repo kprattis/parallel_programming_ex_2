@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-
 int BLOCKSIZE;
 
 int main(int argc, char *argv[]){
@@ -12,16 +11,22 @@ int main(int argc, char *argv[]){
     int n = 10000;
     int d = 3;
 
-    int k = 27;
+    int k = 5;
+    int rows, cols;
 
-    BLOCKSIZE = n/10;
+    BLOCKSIZE = n;
+    char filename[] = "assets/t10k-images.idx3-ubyte";
 
+    double *X = read_MNIST_images(filename, &m, &rows, &cols);
+    d = rows * cols;
+
+    printf("%d %d %d \n", m, d, m*d);
+    
     double start[] = {-2.0, -2.0, -2.0};
     double end[] = {2.0, 2.0, 2.0};
     double step[] = {0.1, 0.1, 0.1};
-
-    double *X = regular_grid(d, start, end, step, &m);//malloc(m * d * sizeof(double));
     
+    //double *X = regular_grid(d, start, end, step, &m);//malloc(m * d * sizeof(double));
     n = m;
     printf("%d %d %d\n",m, n, d);
     double *Y = X;
@@ -33,13 +38,13 @@ int main(int argc, char *argv[]){
 
     
     //print arrays
-    /*
+
     printf("Query X:\n");
-    print_arr(X, m, d, DOUBLE);
+    //print_arr(X, m, d, DOUBLE);
 
     printf("Corpus Y:\n");
-    print_arr(Y, n, d, DOUBLE);
-    */
+    //print_arr(Y, n, d, DOUBLE);
+    
     knnresult knn;
     
     struct timeval start_time, end_time;
@@ -50,11 +55,13 @@ int main(int argc, char *argv[]){
     gettimeofday(&end_time, NULL);
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
 
-    printf("time: %lf\n", elapsed_time);
-    //print results
-    //print_results(knn);
     
+    //print results
+    print_results(knn, false);
+    printf("time: %lf\n", elapsed_time);
+
     free_knnresult(knn);
+    
     free(X);
     //free(Y);
     return 0;

@@ -28,12 +28,14 @@ void print_arr(void *arr, int a, int b, type t){
     
 }
 
-void print_results(knnresult knn){
+void print_results(knnresult knn, bool print_dist){
     printf("The %d nearest neighbors id's for each query point are:\n", knn.k);
     print_arr(knn.nidx, knn.m, knn.k, INT);
 
-    printf("With distances:\n");
-    print_arr(knn.ndist, knn.m, knn.k, DOUBLE);
+    if(print_dist){
+        printf("With distances:\n");
+        print_arr(knn.ndist, knn.m, knn.k, DOUBLE);
+    }
 }
 
 knnresult init_knnresult(int k, int m){
