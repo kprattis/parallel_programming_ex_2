@@ -1,28 +1,30 @@
-CBLAS = ~/Desktop/CBLAS
-include $(CBLAS)/Makefile.in
-
+#bin/bash
 OBJ = obj
 BIN = bin
 SRC = src
 INC = inc
 
+CC = gcc
+
+CFLAGS = -I$(INC) -lopenblas #-fopenmp
+
 SEQ = $(BIN)/knn_seq
 
-OBJFILES = $(addprefix $(OBJ)/, $(shell  ls ./$(SRC)/ | sed -E 's/.c$$/.o/g'))  
+OBJFILES = $(addprefix $(OBJ)/, $(shell  ls ./$(SRC)/| sed -E 's/.c$$/.o/g'))  
 
-all: $(SEQ)
+all:
+	make run
 
 run: $(SEQ)
 	./$(SEQ)
 
 $(SEQ): $(OBJFILES)
 	mkdir -p $(BIN)
-	$(LOADER) -o $@ $^ $(CBLIB) $(BLLIB)
-	
+	$(CC) -o $@ $^ $(CFLAGS)
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
-	$(CC) -c $(CFLAGS) -o $@ -I$(INC) $^
+	$(CC) -c -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -f $(OBJ)/*.o $(SEQ)

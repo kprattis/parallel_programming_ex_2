@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 
     char *name = (char *)malloc(sizeof(char) * 20);
     for(int i = 0; i < k; i++){
-        sprintf(name, "../Images/img%d.txt", i+1);
+        sprintf(name, "./Images/img%d.txt", i+1);
         save_image(X + knn.nidx[i] * d, rows, cols, name);
     }
 
