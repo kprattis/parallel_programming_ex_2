@@ -45,4 +45,6 @@ void free_knnresult(knnresult knn);
 double euclidean_norm(double *vec, int d);
 int min(int a, int b);
 
+int quickselect(double *D, int n, int k, double *dist, int *idx);
+
 void print_arr(double *arr, int r, int c);

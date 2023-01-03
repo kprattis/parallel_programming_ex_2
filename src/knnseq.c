@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "knn.h"
-#include <cblas.h>
+//#include <cblas.h>
 #include <stdlib.h>
 #include <sys/time.h>
 //#include <omp.h>
@@ -37,14 +37,14 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
         for(int j = 0; j < n; j++)
             D[i * n + j] = euclidean_norm(Y + j * d, d) + euclidean_norm(X + i * d, d);
     
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, n, d, -2.0, X, d, Y, d, 1.0 , D, n);
+    //cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, n, d, -2.0, X, d, Y, d, 1.0 , D, n);
 
     print_arr(X, m, d);
     print_arr(Y, n, d);
     print_arr(D, m, n);
 
-    //for(int i = 0; i < m; i++)
-        //quickselect(D, n, k, knn.ndist + i * n, knn.nidx + i * n);
+    for(int i = 0; i < m; i++)
+        quickselect(D, n, k, knn.ndist + i * n, knn.nidx + i * n);
 
     free(D);
     return knn;
@@ -52,19 +52,28 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 
 int main(int argc, char *argv[]){
 
-    int n = 2, m = 2, k =1, d = 1;
+    
+    int n = 2, m = 2, k = 2, d = 1;
     double X[] = {2.0, 3.0};
     double Y[] = {1.0, 4.0};
-    
+    double D[] = {2.0, 3.0, 4.0, 7.0, 1.0};
+
     struct timeval start_time, end_time;
     double elapsed_time;
-
+    knnresult knn = init_knnresult(1, k);
+    
     gettimeofday(&start_time, NULL);
-    knnresult knn = kNN(X, Y, n, m, d, k);
+    //knnresult knn = kNN(X, Y, n, m, d, k);
     gettimeofday(&end_time, NULL);
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
+    
+    printf("Time is %d\n", 2);
+    int ret = quickselect(D, 5, k, knn.ndist, knn.nidx);
 
-    printf("Time is %lf\n", elapsed_time);
+    printf("%d\n", ret);
+
+    print_arr((double *)knn.nidx, 1, k);
+    print_arr(knn.ndist, 1, k);
 
     free_knnresult(knn);
     //free(X);

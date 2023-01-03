@@ -1,6 +1,7 @@
 #include "knn.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 //Init-free functions
 
@@ -34,8 +35,41 @@ int min(int a, int b){
     return (a < b) ? a : b;
 }
 
-void quickselect(double *D, int n, int k, double *dist, int *idx){
-    int a;
+int quickselect(double *D, int n, int k, double *dist, int *idx){
+
+    if(n == 0)
+        return 0;
+
+    srand(time(NULL));
+    int pivot = (int) (rand() * (n - 1)), l = 0;
+    double temp;
+
+    for(int i = 0; i < n; i++)
+        if(D[i] < D[pivot]){
+            temp = D[l];
+            D[l] = D[i];
+            D[i] = temp;
+
+            l++;
+        }
+    
+    printf("%d %lf\n", l, D[pivot]);
+    
+    if(k < l)
+        return quickselect(D, l, k, dist, idx);
+    
+    for(int i = 0; i < l; i++){
+        dist[i] =  D[i];
+        idx[i] = i;
+    }
+
+    int ret = l + quickselect(D + l, n - l, k - l, dist + l, idx + l);
+
+    for(int i = l; i < k; i++)
+        idx[i] += i;
+
+    return ret;
+
 }
 
 //print helpers
