@@ -1,7 +1,6 @@
 #include "knn.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 
 //Init-free functions
 
@@ -35,49 +34,21 @@ int min(int a, int b){
     return (a < b) ? a : b;
 }
 
-int quickselect(double *D, int n, int k, double *dist, int *idx){
-
-    if(n == 0)
-        return 0;
-
-    srand(time(NULL));
-    int pivot = (int) (rand() * (n - 1)), l = 0;
-    double temp;
-
-    for(int i = 0; i < n; i++)
-        if(D[i] < D[pivot]){
-            temp = D[l];
-            D[l] = D[i];
-            D[i] = temp;
-
-            l++;
-        }
-    
-    printf("%d %lf\n", l, D[pivot]);
-    
-    if(k < l)
-        return quickselect(D, l, k, dist, idx);
-    
-    for(int i = 0; i < l; i++){
-        dist[i] =  D[i];
-        idx[i] = i;
-    }
-
-    int ret = l + quickselect(D + l, n - l, k - l, dist + l, idx + l);
-
-    for(int i = l; i < k; i++)
-        idx[i] += i;
-
-    return ret;
-
-}
-
 //print helpers
 
-void print_arr(double *arr, int r, int c){
+void print_arrd(double *arr, int r, int c){
     for(int i = 0; i < r; i++){
         for(int j = 0; j < c; j++)
             printf("%.3lf ", arr[i* c + j]);
+        printf("\n");
+    }
+    printf("\n");
+}
+
+void print_arri(int *arr, int r, int c){
+    for(int i = 0; i < r; i++){
+        for(int j = 0; j < c; j++)
+            printf("%d ", arr[i* c + j]);
         printf("\n");
     }
     printf("\n");

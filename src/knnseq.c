@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "knn.h"
-//#include <cblas.h>
+#include <cblas.h>
 #include <stdlib.h>
 #include <sys/time.h>
-//#include <omp.h>
+#include <omp.h>
 
 //The assumption is that the memory of our computer is enough for 3 n*d double arrays. 
 //Therefore we will compute block by block the distance matrix D, each block with enough
@@ -37,14 +37,20 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
         for(int j = 0; j < n; j++)
             D[i * n + j] = euclidean_norm(Y + j * d, d) + euclidean_norm(X + i * d, d);
     
-    //cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, n, d, -2.0, X, d, Y, d, 1.0 , D, n);
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, n, d, -2.0, X, d, Y, d, 1.0 , D, n);
 
-    print_arr(X, m, d);
-    print_arr(Y, n, d);
-    print_arr(D, m, n);
+    print_arrd(X, m, d);
+    print_arrd(Y, n, d);
+    print_arrd(D, m, n);
 
-    for(int i = 0; i < m; i++)
-        quickselect(D, n, k, knn.ndist + i * n, knn.nidx + i * n);
+    for(int i = 0; i < m; i++){
+        kselect(D + i * n, 0, n - 1, k, knn.ndist + i * k, knn.nidx + i * k);
+    
+        //modify indexes to be global
+        for(int j = 0; j < k; j++)
+            knn.nidx[i * k + j] *= d;
+            // this now shows to the start of the corresponding corpus point
+    }
 
     free(D);
     return knn;
@@ -53,27 +59,21 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 int main(int argc, char *argv[]){
 
     
-    int n = 2, m = 2, k = 2, d = 1;
-    double X[] = {2.0, 3.0};
-    double Y[] = {1.0, 4.0};
-    double D[] = {2.0, 3.0, 4.0, 7.0, 1.0};
+    int n = 3, m = 2, k = 2, d = 2;
+    double Y[] = {2.0, 3.0, 4.0, 8.0 ,9.0, 11.0};
+    double X[] = {1.0, 4.0, 2.0, 6.0};
 
     struct timeval start_time, end_time;
     double elapsed_time;
-    knnresult knn = init_knnresult(1, k);
     
     gettimeofday(&start_time, NULL);
-    //knnresult knn = kNN(X, Y, n, m, d, k);
+    knnresult knn = kNN(X, Y, n, m, d, k);
     gettimeofday(&end_time, NULL);
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
     
-    printf("Time is %d\n", 2);
-    int ret = quickselect(D, 5, k, knn.ndist, knn.nidx);
-
-    printf("%d\n", ret);
-
-    print_arr((double *)knn.nidx, 1, k);
-    print_arr(knn.ndist, 1, k);
+    printf("Time is %lf\n", elapsed_time);
+    print_arri(knn.nidx, m, k);
+    print_arrd(knn.ndist, m, k);
 
     free_knnresult(knn);
     //free(X);

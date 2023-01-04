@@ -41,10 +41,11 @@ knnresult distrAllkNN(double * X, int n, int d, int k);
 knnresult init_knnresult(int k, int m);
 void free_knnresult(knnresult knn);
 
+//select function
+void kselect(double *D, int left, int right, int k, double *dist, int *idx);
+
 //helpers
 double euclidean_norm(double *vec, int d);
 int min(int a, int b);
-
-int quickselect(double *D, int n, int k, double *dist, int *idx);
-
-void print_arr(double *arr, int r, int c);
+void print_arrd(double *arr, int r, int c);
+void print_arri(int *arr, int r, int c);
