@@ -4,9 +4,10 @@ BIN = bin
 SRC = src
 INC = inc
 
-CC = gcc
+CC = ~/Downloads/OpenCilk-2.0.0-x86_64-Linux-Ubuntu-22.04/bin/clang
 
-CFLAGS = -I$(INC) -lopenblas #-fopenmp
+CFLAGS = -O3 -I$(INC) -fopencilk
+LFLAGS = -lopenblas -lpthread
 
 SEQ = $(BIN)/knn_seq
 
@@ -20,7 +21,7 @@ run: $(SEQ)
 
 $(SEQ): $(OBJFILES)
 	mkdir -p $(BIN)
-	$(CC) -o $@ $^ $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LFLAGS)
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)

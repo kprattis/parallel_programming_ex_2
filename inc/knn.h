@@ -1,3 +1,6 @@
+#ifndef KNN
+#define KNN
+
 typedef enum bool {false = 0, true = 1} bool;
 
 typedef enum type {INT, DOUBLE} type;
@@ -49,3 +52,9 @@ double euclidean_norm(double *vec, int d);
 int min(int a, int b);
 void print_arrd(double *arr, int r, int c);
 void print_arri(int *arr, int r, int c);
+
+//init query
+void randarr(double *X, int size, double max, double min);
+
+
+#endif

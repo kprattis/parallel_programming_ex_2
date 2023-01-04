@@ -39,7 +39,7 @@ int min(int a, int b){
 void print_arrd(double *arr, int r, int c){
     for(int i = 0; i < r; i++){
         for(int j = 0; j < c; j++)
-            printf("%.3lf ", arr[i* c + j]);
+            printf("%+.2lf ", arr[i* c + j]);
         printf("\n");
     }
     printf("\n");
@@ -48,7 +48,7 @@ void print_arrd(double *arr, int r, int c){
 void print_arri(int *arr, int r, int c){
     for(int i = 0; i < r; i++){
         for(int j = 0; j < c; j++)
-            printf("%d ", arr[i* c + j]);
+            printf("%2d ", arr[i* c + j]);
         printf("\n");
     }
     printf("\n");

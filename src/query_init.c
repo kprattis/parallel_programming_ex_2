@@ -4,16 +4,12 @@
 #include <endian.h>
 #include <time.h>
 
-double * randarr(int size, double max, double min){
-    double *X = (double *) malloc(size * sizeof(int)); 
-    
+void randarr(double *X, int size, double max, double min){
+   
     srand(time(NULL));
-
-    for(int j = 0; j < size; j++){
+    for(int j = 0; j < size; j++)
         X[j] = (rand() * 1.0 / RAND_MAX) * (max - min) + min;
-    }
-    
-    return X;
+
 }
 
 double * regular_grid(int dim, double start[], double end[], double step[], int *n_points){
