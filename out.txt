@@ -1,0 +1,11 @@
+make run
+make[1]: Entering directory '/home/kprattis/Desktop/parallel_programming_ex_2-1'
+mkdir -p obj
+~/Downloads/OpenCilk-2.0.0-x86_64-Linux-Ubuntu-22.04/bin/clang -c -o obj/select.o src/select.c -O3 -Iinc -fopencilk
+mkdir -p bin
+~/Downloads/OpenCilk-2.0.0-x86_64-Linux-Ubuntu-22.04/bin/clang -o bin/knn_seq obj/helpers.o obj/kNN_V0.o obj/query_init.o obj/select.o -O3 -Iinc -fopencilk -lopenblas -lpthread
+./bin/knn_seq
++7.71 +6.87 +6.40 +5.02 +6.19 +5.23 +6.76 +7.18 +8.19 +8.25 
+
+Time is 0.000496
+make[1]: Leaving directory '/home/kprattis/Desktop/parallel_programming_ex_2-1'

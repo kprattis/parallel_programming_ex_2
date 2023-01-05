@@ -3,10 +3,18 @@
 #include <string.h>
 #include <stdio.h>
 #include <cilk/cilk.h>
+#include <cilk/cilk_api.h>
 #include <pthread.h>
+
 
 void swap(double *a, double *b){
     double temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void swapi(int *a, int *b){
+    int temp = *a;
     *a = *b;
     *b = temp;
 }
@@ -47,6 +55,38 @@ double quickselect(double* D, int left, int right, int k){
     
 }
 
+void prefix_scan(double *D, int left, int right, int k, double pivot, double *dist, int *idx){
+    int cnt = 0;
+    int p = __cilkrts_get_nworkers();
+    pthread_mutex_t cnt_mutex;
+    pthread_mutex_init(&cnt_mutex, NULL);
+    
+    cilk_for(int i = left; i <= right; i++){
+        if(D[i] < pivot){
+            pthread_mutex_lock(&cnt_mutex);
+            dist[cnt] = D[i];
+            idx[cnt] = i;
+            cnt ++;
+            pthread_mutex_unlock(&cnt_mutex);
+        }
+    }
+
+    cilk_for(int i = left; i <= right; i++){
+        if(D[i] == pivot){
+            pthread_mutex_lock(&cnt_mutex);
+            if(cnt < k){
+                dist[cnt] = D[i];
+                idx[cnt] = i;
+                cnt ++;
+            }
+            pthread_mutex_unlock(&cnt_mutex);
+        }
+    }
+
+    pthread_mutex_destroy(&cnt_mutex);
+}
+
+
 
 void kselect(double *D, int left, int right, int k, double *dist, int *idx){
     
@@ -59,32 +99,14 @@ void kselect(double *D, int left, int right, int k, double *dist, int *idx){
 
     free(Dcopy);
 
-    int cnt = 0;
-    pthread_mutex_t cnt_mutex;
-    pthread_mutex_init(&cnt_mutex, NULL);
+    prefix_scan(D, left, right, k,  pivot, dist, idx);
 
-    cilk_for(int i = left; i <= right; i++)
+    print_arrd(dist, 1, k);
 
-        if(D[i] < pivot){
-            pthread_mutex_lock(&cnt_mutex);
-            dist[cnt] = D[i];
-            idx[cnt] = i;
-            cnt ++;
-            pthread_mutex_unlock(&cnt_mutex);
-        }
+    //mergesort(idx, dist, 0, k - 1);
 
-    if(cnt < k)
-        cilk_for(int i = left; i <= right; i++){
-            if(D[i] == pivot){
-                pthread_mutex_lock(&cnt_mutex);
-                dist[cnt] = D[i];
-                idx[cnt] = i;
-                cnt ++;
-                pthread_mutex_unlock(&cnt_mutex);
-            }
-        }
+    //print_arrd(dist, 1, k);
 
-    pthread_mutex_destroy(&cnt_mutex);
 }
 
 
