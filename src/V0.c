@@ -1,25 +1,40 @@
 #include "knn.h"
 #include <stdio.h>
 #include <cblas.h>
+#include <math.h>
 #include <stdlib.h>
 #include <sys/time.h>
 #include <cilk/cilk.h>
 
-#define BLOCKSIZE 1024 * 1024
+#define MAXSIZE 1024
+
 
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 
+    int BLOCKSIZE = n;
+    if (n * m > MAXSIZE)
+        BLOCKSIZE = MAXSIZE;   
+
+    printf("%d\n", BLOCKSIZE);
+
+    //here store norms of Y points
     double *normy = (double *) malloc(BLOCKSIZE * sizeof(double));  
     
+    //calculate norms of X points
     double *normx = (double *) malloc(m * sizeof(double));
     cilk_for(int i = 0; i < m; i++)
         normx[i] = euclidean_norm(X + i * d, d);
 
+    //Distance array
     double *D = (double *) malloc(m * BLOCKSIZE * sizeof(double));
 
-    knnresult knn = init_knnresult(m, k);
-
-    int start, end, size;
+    //the result
+    knnresult knn;
+    
+    double *shortest_distances = (double *) malloc(sizeof(double) * 3 * k * m);
+    int *nearest_idxs = (int *) malloc(sizeof(int) * 3 * k * m);
+    
+    int start, end, size, id = 0;
 
     for(int b = 0; b < n; b += BLOCKSIZE){
         start = b;
@@ -38,33 +53,55 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
         //print_arrd(X, m, d);
         //print_arrd(Y + start * d, size, d);
         //print_arrd(D, m, size);
-        
-        
 
+        int nfound = min(k, size);
         cilk_for(int i = 0; i < m; i++){
-            kselect(D + i * BLOCKSIZE, 0, size - 1, k, knn.ndist + i * k, knn.nidx + i * k); 
+            printf("%d %d\n", i, id);
+            kselect(Dcopy, D + i * BLOCKSIZE, 0, size - 1, nfound, shortest_distances +  3 * i * k + k * (id != 0), nearest_idxs + 3 * i * k + k * (id != 0)); 
+            printf("%d %d\n", i, id);
             //modify indexes to be global
             cilk_for(int j = 0; j < k; j++){
-                knn.nidx[i * k + j] += start; 
-                knn.nidx[i * k + j] *= d;
+                nearest_idxs[3 * i * k + k * (id != 0) + j] += start; 
+                nearest_idxs[3 * i * k + k * (id != 0) + j] *= d;
             }
-                // this now shows to the start of the corresponding corpus point
+            
+            if(id != 0){
+                printf("%d %d\n", i, id);
+                kselect(shortest_distances + 3 * i * k, 0, k + nfound - 1, k, shortest_distances + 3 * i * k + 2 * k, nearest_idxs + 3 * i * k + 2 * k);
+                printf("%d %d\n", i, id);
+                cilk_for(int j = 0; j < k; j++){
+                    nearest_idxs[3 * i * k + j] = nearest_idxs[3 * i * k + 2 * k + j];
+                    shortest_distances[3 * i * k + j] = shortest_distances[3 * i * k + 2 * k + j];
+                }
+                
+            }
         }
-
+        id ++;
     }
-
-
 
     free(normx);
     free(normy);
+
     free(D);
     
+
+    knn = init_knnresult(m, k);
+    for(int i = 0; i < m; i++){
+        for(int j = 0; j < k; j++){
+            knn.nidx[i * k + j] = nearest_idxs[3 * i * k + j];
+            knn.ndist[i * k + j] = shortest_distances[3 * i * k + j];
+        }
+    }
+    printf("%d\n", id);    
+    free(nearest_idxs);
+    free(shortest_distances);
+
     return knn;
 }
 
 int main(int argc, char *argv[]){
     
-    int n = 800, m = 1, k = 10, d = 3;
+    int n = 1024 * 2, m = 1, k = 1, d = 1;
 
     double *X = (double *) malloc(sizeof(double) * m * d);
     double *Y = (double *) malloc(sizeof(double) * n * d);
@@ -82,6 +119,8 @@ int main(int argc, char *argv[]){
         exit(1);
     }
 
+    //print_arrd(X, m, d);
+    //print_arrd(Y, n, d);
 
     struct timeval start_time, end_time;
     double elapsed_time;
@@ -92,8 +131,8 @@ int main(int argc, char *argv[]){
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
     
     
-    //print_arri(knn.nidx, m, k);
-    //print_arrd(knn.ndist, m, k);
+    print_arri(knn.nidx, m, k);
+    print_arrd(knn.ndist, m, k);
     printf("Time is %lf\n", elapsed_time);
 
     free_knnresult(knn);

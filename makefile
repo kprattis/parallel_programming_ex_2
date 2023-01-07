@@ -6,7 +6,7 @@ INC = inc
 
 CC = ~/Downloads/OpenCilk-2.0.0-x86_64-Linux-Ubuntu-22.04/bin/clang
 
-CFLAGS = -O3 -I$(INC) -fopencilk
+CFLAGS = -O1 -I$(INC) -g -Wall -fopencilk
 LFLAGS = -lopenblas -lpthread
 
 SEQ = $(BIN)/knn_seq

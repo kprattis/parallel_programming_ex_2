@@ -41,7 +41,7 @@ knnresult init_knnresult(int k, int m);
 void free_knnresult(knnresult knn);
 
 //select function
-void kselect(double *D, int left, int right, int k, double *dist, int *idx);
+void kselect(double *Dcopy, double *D, int left, int right, int k, double *dist, int *idx);
 
 //helpers
 double euclidean_norm(double *vec, int d);
