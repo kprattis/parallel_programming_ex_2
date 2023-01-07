@@ -88,21 +88,18 @@ void prefix_scan(double *D, int left, int right, int k, double pivot, double *di
 
 
 
-void kselect(double *Dcopy, double *D, int left, int right, int k, double *dist, int *idx){
+void kselect(double *D, int left, int right, int k, double *dist, int *idx){
     
     int n = right - left + 1;
-    printf("OKin%d\n", n);
-
-    //double *Dcopy = (double *) malloc(n *sizeof(double));
-    printf("OKin%d\n", n);
-
+    double *Dcopy = (double *) malloc(n *sizeof(double));
+        
     memcpy(Dcopy, D + left, sizeof(double) * n);
 
     double pivot = quickselect(Dcopy, 0, n - 1, k);
     
-    //free(Dcopy);
+    free(Dcopy);
     prefix_scan(D, left, right, k,  pivot, dist, idx);
-    printf("OKin%d\n", n);
+
 }
 
 

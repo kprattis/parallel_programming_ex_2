@@ -41,7 +41,7 @@ knnresult init_knnresult(int k, int m);
 void free_knnresult(knnresult knn);
 
 //select function
-void kselect(double *Dcopy, double *D, int left, int right, int k, double *dist, int *idx);
+void kselect(double *D, int left, int right, int k, double *dist, int *idx);
 
 //helpers
 double euclidean_norm(double *vec, int d);
@@ -51,6 +51,6 @@ void print_arri(int *arr, int r, int c);
 
 //init query
 void randarr(double *X, int size, double max, double min);
-
+double * read_MNIST_images(char *filename, int *num_images, int *rows, int *cols);
 
 #endif

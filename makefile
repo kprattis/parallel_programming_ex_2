@@ -1,4 +1,4 @@
-#bin/bash
+#! bin/bash
 OBJ = obj
 BIN = bin
 SRC = src
@@ -29,4 +29,11 @@ $(OBJ)/%.o: $(SRC)/%.c
 
 clean:
 	rm -f $(OBJ)/*.o $(SEQ)
+	
+purge:
+	make clean
+	@ mkdir -p $(OBJ)
+	@ mkdir -p $(BIN)
+	rmdir $(OBJ)
+	rmdir $(BIN)
 	

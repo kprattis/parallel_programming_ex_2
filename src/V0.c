@@ -5,17 +5,26 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <cilk/cilk.h>
+#include <string.h>
 
-#define MAXSIZE 1024
+#define MAXSIZE  5 * 1024 * 1024
 
 
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 
     int BLOCKSIZE = n;
-    if (n * m > MAXSIZE)
-        BLOCKSIZE = MAXSIZE;   
+    if (n * m > MAXSIZE){
+      BLOCKSIZE = min( m * n / 4, MAXSIZE);
+      BLOCKSIZE = MAXSIZE / m;   
+    }
 
-    printf("%d\n", BLOCKSIZE);
+
+    printf("%d reduced from %d\n", BLOCKSIZE * m, n * m);
+
+    if(BLOCKSIZE < 10){
+        printf("too large sizes m = %d, n = %d, d = %d\n", m, n, d);
+        exit(1);
+    }
 
     //here store norms of Y points
     double *normy = (double *) malloc(BLOCKSIZE * sizeof(double));  
@@ -34,7 +43,7 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     double *shortest_distances = (double *) malloc(sizeof(double) * 3 * k * m);
     int *nearest_idxs = (int *) malloc(sizeof(int) * 3 * k * m);
     
-    int start, end, size, id = 0;
+    int start, end, size;
 
     for(int b = 0; b < n; b += BLOCKSIZE){
         start = b;
@@ -46,29 +55,30 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 
         cilk_for(int i = 0; i < m; i++)
             cilk_for(int j = start; j < end; j++)
-                D[i * n + j] = normx[i] + normy[j - start];
+                D[i * BLOCKSIZE + j - start] = normx[i] + normy[j - start];
 
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, size, d, -2.0, X, d, Y + start * d, d, 1.0 , D, size);
 
-        //print_arrd(X, m, d);
-        //print_arrd(Y + start * d, size, d);
-        //print_arrd(D, m, size);
 
         int nfound = min(k, size);
         cilk_for(int i = 0; i < m; i++){
-            printf("%d %d\n", i, id);
-            kselect(Dcopy, D + i * BLOCKSIZE, 0, size - 1, nfound, shortest_distances +  3 * i * k + k * (id != 0), nearest_idxs + 3 * i * k + k * (id != 0)); 
-            printf("%d %d\n", i, id);
+
+            kselect(D + i * BLOCKSIZE, 0, size - 1, nfound, shortest_distances +  3 * i * k + k * (b != 0), nearest_idxs + 3 * i * k + k * (b != 0)); 
+
             //modify indexes to be global
             cilk_for(int j = 0; j < k; j++){
-                nearest_idxs[3 * i * k + k * (id != 0) + j] += start; 
-                nearest_idxs[3 * i * k + k * (id != 0) + j] *= d;
+                nearest_idxs[3 * i * k + k * (b != 0) + j] += start; 
+                nearest_idxs[3 * i * k + k * (b != 0) + j] *= d;
             }
-            
-            if(id != 0){
-                printf("%d %d\n", i, id);
+        
+            if(b != 0){
+
                 kselect(shortest_distances + 3 * i * k, 0, k + nfound - 1, k, shortest_distances + 3 * i * k + 2 * k, nearest_idxs + 3 * i * k + 2 * k);
-                printf("%d %d\n", i, id);
+
+                cilk_for(int j = 0; j < k; j++){
+                    nearest_idxs[3 * i * k + 2 * k + j] = nearest_idxs[3 * i * k + nearest_idxs[3 * i * k + 2 * k + j]];
+                }
+
                 cilk_for(int j = 0; j < k; j++){
                     nearest_idxs[3 * i * k + j] = nearest_idxs[3 * i * k + 2 * k + j];
                     shortest_distances[3 * i * k + j] = shortest_distances[3 * i * k + 2 * k + j];
@@ -76,7 +86,6 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
                 
             }
         }
-        id ++;
     }
 
     free(normx);
@@ -86,13 +95,13 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     
 
     knn = init_knnresult(m, k);
-    for(int i = 0; i < m; i++){
-        for(int j = 0; j < k; j++){
+    cilk_for(int i = 0; i < m; i++){
+        cilk_for(int j = 0; j < k; j++){
             knn.nidx[i * k + j] = nearest_idxs[3 * i * k + j];
             knn.ndist[i * k + j] = shortest_distances[3 * i * k + j];
         }
     }
-    printf("%d\n", id);    
+  
     free(nearest_idxs);
     free(shortest_distances);
 
@@ -100,22 +109,38 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 }
 
 int main(int argc, char *argv[]){
-    
-    int n = 1024 * 2, m = 1, k = 1, d = 1;
-
-    double *X = (double *) malloc(sizeof(double) * m * d);
-    double *Y = (double *) malloc(sizeof(double) * n * d);
+    int n, m, k = 3, d;
+    double *X, *Y;
 
     if(argc < 2){
+        n = 10000;
+        m = 10000; 
+        k = 3; 
+        d = 1;
+        
+        X = (double *) malloc(sizeof(double) * m * d);
+        Y = (double *) malloc(sizeof(double) * n * d);
+        
         randarr(X, m * d, 5.0, -5.0);
         randarr(Y, n * d, 2.0, -2.0);
     }
     else if(argc == 2){
-        randarr(X, m * d, 5.0, -5.0);
-        randarr(Y, n * d, 2.0, -2.0);
+        int rows, cols;
+        k = 5;
+        X = read_MNIST_images(argv[1], &m, &rows, &cols);
+        d = rows * cols;
+        n = m;
+        Y = X;
+    }
+    else if(argc == 3){
+        int rows, cols;
+        k = 5;
+        X = read_MNIST_images(argv[1], &m, &rows, &cols);
+        d = rows * cols;
+        Y = read_MNIST_images(argv[2], &n, &rows, &cols);
     }
     else{
-        fprintf(stderr, "Wrong number of inputs, expected 0 or 1 but got %d.\nInput a filename containing the data or nothing for a random example.\n", argc - 1);
+        fprintf(stderr, "Wrong number of inputs, expected 0 or 1 but got %d.\nInput a filename containing the data for X to be copied to Y or 2 filenames for X and Y or nothing for a random example.\n", argc - 1);
         exit(1);
     }
 
@@ -131,12 +156,14 @@ int main(int argc, char *argv[]){
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
     
     
-    print_arri(knn.nidx, m, k);
-    print_arrd(knn.ndist, m, k);
-    printf("Time is %lf\n", elapsed_time);
+    //print_arri(knn.nidx, m, k);
+    //print_arrd(knn.ndist, m, k);
+    printf("Execution Time, %lf\n", elapsed_time);
+
 
     free_knnresult(knn);
     free(X);
-    free(Y);
+    if(Y != NULL)
+        free(Y);
     return 0;
 }
