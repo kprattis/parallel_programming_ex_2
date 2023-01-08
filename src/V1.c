@@ -13,22 +13,26 @@
 void fprint_arrd(FILE *f, double *arr, int n, int k);
 void fprint_arri(FILE *f, int *arr, int n, int k);
 
-knnresult distrAllkNN(double * X, int n, int d, int k){
+knnresult distrAllkNN(double * X, int n, int d, int k, int N){
     int tid, numtasks;
 
     MPI_Comm_rank( MPI_COMM_WORLD , &tid);
     MPI_Comm_size( MPI_COMM_WORLD , &numtasks);
     
-    MPI_Request mpireq;
-    MPI_Status mpistat;
+    MPI_Request mpireq, mpisizereq[numtasks + 2];
+    MPI_Status mpistat, mpisizestat;
 
     int round = 0;
+    
     int m = n;
-    long BLOCKSIZE = n;
-    if ( (long) n * n > MAXSIZE){
-        BLOCKSIZE = min( (long) n * n / 4, MAXSIZE);
-        BLOCKSIZE = (BLOCKSIZE < n) ? 0 : BLOCKSIZE / n;   
+
+
+
+    long BLOCKSIZE = N - (numtasks - 1) * N / numtasks;
+    if ( (long) BLOCKSIZE * BLOCKSIZE > MAXSIZE){
+        BLOCKSIZE = min( (long)BLOCKSIZE * BLOCKSIZE / 4, MAXSIZE) / BLOCKSIZE;   
     }
+
 
     printf("I am proccess %d and my distance matrix will have size: %d x %ld\n", tid , n, BLOCKSIZE);
     if(BLOCKSIZE < k){
@@ -37,11 +41,11 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
     }
 
     //Distance array
-    double *D = (double *) malloc(n * BLOCKSIZE * sizeof(double));
+    double *D = (double *) malloc(m * BLOCKSIZE * sizeof(double));
     
     //Here store the norms
-    double *normx = (double *) malloc(m * sizeof(double));
-    cilk_for(int i = 0; i < m; i++)
+    double *normx = (double *) malloc(n * sizeof(double));
+    cilk_for(int i = 0; i < n; i++)
         normx[i] = euclidean_norm(X + i * d, d);
 
     double *normy = (double *) malloc(BLOCKSIZE * sizeof(double));
@@ -49,11 +53,10 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
     //the result
     knnresult knn = init_knnresult(n, k);
 
-    double *Y = (double *) malloc(sizeof(double) * n * d);
-    
-    memcpy(Y, X, n * d * sizeof(double));
+    double *Y = (double *) malloc(sizeof(double) * m * d);
+    memcpy(Y, X, m * d * sizeof(double));
 
-    double *Z = (double *) malloc(sizeof(double) * n * d);
+    double *Z = (double *) malloc(sizeof(double) * m * d);
     
     int dest = (tid + 1) % numtasks;
     int src = (tid == 0) ? numtasks - 1 : tid - 1;
@@ -65,38 +68,64 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
     // Add the first iteration of the initial points : total of numtasks calculations
     while(round < numtasks){
         
-        MPI_Isend(Y, n * d, MPI_DOUBLE , dest, 1000 + 100 * round + tid , MPI_COMM_WORLD, &mpireq);
-        
+        printf("Here I stuck before %d\n", tid);
+        MPI_Isend(Y, m * d, MPI_DOUBLE , dest, n , MPI_COMM_WORLD, &mpireq);
+        printf("Here I stuck after %d\n", tid);
         //------------------Calculate the knn result--------------------------------
-        for(int b = 0; b < n; b += BLOCKSIZE){
+        for(int b = 0; b < m; b += BLOCKSIZE){
             start = b;
-            end = min(n, b + BLOCKSIZE);
+            end = min(m, b + BLOCKSIZE);
             size = end - start;
 
             cilk_for(int i = 0; i < BLOCKSIZE; i++)
                 normy[i] = euclidean_norm(Y + i * d, d);
 
-            cilk_for(int i = 0; i < m; i++)
+            cilk_for(int i = 0; i < n; i++)
                 cilk_for(int j = start; j < end; j++){
                     D[i * BLOCKSIZE + j - start] = normx[i] + normy[j - start];
                 }
 
-            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, size, d, -2.0, X, d, Y + start * d, d, 1.0 , D, size);
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, n, size, d, -2.0, X, d, Y + start * d, d, 1.0 , D, size);
 
             kval = min(k, size);
-            cilk_for(int i = 0; i < m; i++)
+            cilk_for(int i = 0; i < n; i++)
                 kselect(D + i * BLOCKSIZE, 0, size - 1, kval, knn.ndist + i * k, knn.nidx + i * k, (b == 0) && (round == 0), start + ((tid + round) % numtasks) * n);
         }
         //--------------------End of own points Calculation----------------------------
+        
+        MPI_Wait(&mpireq, &mpistat);
+        
+        if(tid != numtasks - 1){
+            if(round == tid){
+                m = N - (numtasks - 1) * N / numtasks;
+                Y = realloc(Y, m * d * sizeof(double));
+                Z = realloc(Z, m * d * sizeof(double));
+            }
 
-        MPI_Recv(Z, n * d, MPI_DOUBLE , src , 1000 + 100 * round + src , MPI_COMM_WORLD, &mpistat);
+            if((round + 1) % numtasks == tid){
+                m = n;
+                Y = realloc(Y, m * d * sizeof(double));
+                Z = realloc(Z, m * d * sizeof(double));
+            }
+            MPI_Recv(Z, m * d, MPI_DOUBLE , src , MPI_ANY_TAG , MPI_COMM_WORLD, &mpistat);
+        }
+        else{
+            if(round == 0){
+                m = N/numtasks;
+                Y = realloc(Y, m * d * sizeof(double));
+                Z = realloc(Z, m * d * sizeof(double));
+            }   
+            
+            MPI_Recv(Z, m * d, MPI_DOUBLE, src, MPI_ANY_TAG , MPI_COMM_WORLD, &mpistat);
+            
+        }
 
+        
         double *temp = Z;
         Z = Y;
         Y = temp;    
 
         round ++;  
-        MPI_Wait(&mpireq, &mpistat);
     }
 
     free(D);
@@ -120,10 +149,10 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank( MPI_COMM_WORLD , &tid);
     MPI_Comm_size( MPI_COMM_WORLD , &numtasks);
 
-    int N = 12, d = 2, k = 2, n;
-    int chunk = N * d / numtasks;
+    int N = 14, d = 2, k = 2, n;
+    int chunk = N / numtasks;
     int start = tid * chunk;
-    int end = (tid == numtasks - 1) ? N * d : (tid + 1) * chunk;
+    int end = (tid == numtasks - 1) ? N  : (tid + 1) * chunk;
     n = end - start;
     double *X = (double *) malloc(sizeof(double) * n * d);
 
@@ -135,7 +164,7 @@ int main(int argc, char *argv[]){
     struct timeval start_time, end_time;
     double elapsed_time;
     gettimeofday(&start_time, NULL);
-        knnresult knn = distrAllkNN(X, n, d, k);
+        knnresult knn = distrAllkNN(X, n, d, k, N);
     gettimeofday(&end_time, NULL);
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
 

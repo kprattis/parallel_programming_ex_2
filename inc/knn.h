@@ -34,7 +34,7 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k);
 
   \return  The kNN result
 */
-knnresult distrAllkNN(double * X, int n, int d, int k);
+knnresult distrAllkNN(double * X, int n, int d, int k, int N);
 
 
 //functions for initialiization / dealocation of knnresult struct
