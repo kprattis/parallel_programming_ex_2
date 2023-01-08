@@ -42,10 +42,11 @@ void free_knnresult(knnresult knn);
 
 //select function
 void kselect(double *D, int left, int right, int k, double *dist, int *idx);
+void swap(double *a, double *b);
 
 //helpers
 double euclidean_norm(double *vec, int d);
-int min(int a, int b);
+long min(long a, long b);
 void print_arrd(double *arr, int r, int c);
 void print_arri(int *arr, int r, int c);
 

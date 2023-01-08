@@ -30,7 +30,7 @@ double euclidean_norm(double *vec, int d){
     return norm;
 }
 
-int min(int a, int b){
+long min(long a, long b){
     return (a < b) ? a : b;
 }
 

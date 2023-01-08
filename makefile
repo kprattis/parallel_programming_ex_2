@@ -4,24 +4,32 @@ BIN = bin
 SRC = src
 INC = inc
 
-CC = ~/Downloads/OpenCilk-2.0.0-x86_64-Linux-Ubuntu-22.04/bin/clang
+CC = gcc
 
-CFLAGS = -O1 -I$(INC) -g -Wall -fopencilk
-LFLAGS = -lopenblas -lpthread
+CFLAGS = -O1 -I$(INC) -g -Wall -fopenmp
+LFLAGS = -lopenblas
 
-SEQ = $(BIN)/knn_seq
+EXEC = $(BIN)/knn 
+#$(BIN)/knn_mpi
 
-OBJFILES = $(addprefix $(OBJ)/, $(shell  ls ./$(SRC)/| sed -E 's/.c$$/.o/g'))  
+OBJFILES = $(addprefix $(OBJ)/, select.o helpers.o query_init.o)
+
+NPROCS = 4 
 
 all:
 	make run
 
-run: $(SEQ)
-	./$(SEQ)
+run: $(EXEC)
+	./$<
+#mpiexec -n $(NPROCS) $>
 
-$(SEQ): $(OBJFILES)
+$(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	mkdir -p $(BIN)
 	$(CC) -o $@ $^ $(CFLAGS) $(LFLAGS)
+
+$(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
+	mkdir -p $(BIN)
+	mpicc -o $@ $^ $(CFLAGS) $(LFLAGS)
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)

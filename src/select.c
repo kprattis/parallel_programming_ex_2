@@ -87,12 +87,23 @@ void prefix_scan(double *D, int left, int right, int k, double pivot, double *di
 }
 
 
+void knn_sort(double *dist, int *idx, int n){
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < i; j++){
+            if(dist[i] < dist[j]){
+                swap(dist + i, dist + j);
+                swapi(idx + i, idx + j);
+            }
+        }
+    }
+}
 
 void kselect(double *D, int left, int right, int k, double *dist, int *idx){
     
     int n = right - left + 1;
     double *Dcopy = (double *) malloc(n *sizeof(double));
-        
+    
     memcpy(Dcopy, D + left, sizeof(double) * n);
 
     double pivot = quickselect(Dcopy, 0, n - 1, k);
@@ -100,7 +111,17 @@ void kselect(double *D, int left, int right, int k, double *dist, int *idx){
     free(Dcopy);
     prefix_scan(D, left, right, k,  pivot, dist, idx);
 
+    //knn_sort(dist, idx, k);
+    
 }
 
+/*
+void cmp_select(knnresult currentknn, double *newD, int n){
+    int pos;
+    for(int i = 0; i < n; i++){
+        pos = currentknn.k - 1;
+    }
+}
+*/
 
 
