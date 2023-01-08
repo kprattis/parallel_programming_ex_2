@@ -23,7 +23,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
     MPI_Status mpistat;
 
     int round = 0;
-
+    int m = n;
     long BLOCKSIZE = n;
     if ( (long) n * n > MAXSIZE){
         BLOCKSIZE = min( (long) n * n / 4, MAXSIZE);
@@ -39,10 +39,18 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
     //Distance array
     double *D = (double *) malloc(n * BLOCKSIZE * sizeof(double));
     
+    //Here store the norms
+    double *normx = (double *) malloc(m * sizeof(double));
+    cilk_for(int i = 0; i < m; i++)
+        normx[i] = euclidean_norm(X + i * d, d);
+
+    double *normy = (double *) malloc(BLOCKSIZE * sizeof(double));
+    
     //the result
     knnresult knn = init_knnresult(n, k);
 
     double *Y = (double *) malloc(sizeof(double) * n * d);
+    
     memcpy(Y, X, n * d * sizeof(double));
 
     double *Z = (double *) malloc(sizeof(double) * n * d);
@@ -55,7 +63,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
 
     while(round < numtasks - 1){
         
-        MPI_Isend(Y, n * d, MPI_DOUBLE , dest, 1000 + 100 * rounds + tid , MPI_COMM_WORLD, &mpireq);
+        MPI_Isend(Y, n * d, MPI_DOUBLE , dest, 1000 + 100 * round + tid , MPI_COMM_WORLD, &mpireq);
         
         //------------------Calculate the knn result--------------------------------
         for(int b = 0; b < n; b += BLOCKSIZE){
@@ -78,14 +86,14 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
                 kselect(D + i * BLOCKSIZE, 0, size - 1, kval, knn.ndist + i * k, knn.nidx + i * k, (b == 0) && (round == 0), start);
         }
         //--------------------End of own points Calculation----------------------------
-        printf("I am %d at round %d\n", tid, rounds);
+        printf("I am %d at round %d\n", tid, round);
         print_arrd(Y, n , d);
 
-        MPI_Recv(Z, n * d, MPI_DOUBLE , src , 1000 + 100*rounds + src , MPI_COMM_WORLD, &mpistat);
+        MPI_Recv(Z, n * d, MPI_DOUBLE , src , 1000 + 100 * round + src , MPI_COMM_WORLD, &mpistat);
 
-        double **temp = &Z;
-        &Z = &Y;
-        &Y = temp;    
+        double *temp = Z;
+        Z = Y;
+        Y = temp;    
 
         round ++;  
         MPI_Wait(&mpireq, &mpistat);
@@ -150,12 +158,6 @@ int main(int argc, char *argv[]){
     printf("%d Execution Time, %lf\n", tid, elapsed_time);
 
     printf("%d finished\n", tid);
-
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < k; j++){
-            knn.nidx[i * k + j]; 
-        }
-    }
 
     //print distances
     if(tid == 0){
