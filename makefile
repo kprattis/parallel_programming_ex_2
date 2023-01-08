@@ -34,7 +34,7 @@ $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) -c -o $@ $^ $(CFLAGS)
 
 clean:
-	rm -f $(OBJ)/*.o $(SEQ)
+	rm -f $(OBJ)/*.o $(EXEC)
 	
 purge:
 	make clean

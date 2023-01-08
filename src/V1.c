@@ -61,7 +61,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
     int start, end, size;
     int kval;
 
-    while(round < numtasks - 1){
+    while(round < numtasks){
         
         MPI_Isend(Y, n * d, MPI_DOUBLE , dest, 1000 + 100 * round + tid , MPI_COMM_WORLD, &mpireq);
         
@@ -83,7 +83,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k){
 
             kval = min(k, size);
             cilk_for(int i = 0; i < m; i++)
-                kselect(D + i * BLOCKSIZE, 0, size - 1, kval, knn.ndist + i * k, knn.nidx + i * k, (b == 0) && (round == 0), start);
+                kselect(D + i * BLOCKSIZE, 0, size - 1, kval, knn.ndist + i * k, knn.nidx + i * k, (b == 0) && (round == 0), start + ((tid + round) % numtasks) * n);
         }
         //--------------------End of own points Calculation----------------------------
         printf("I am %d at round %d\n", tid, round);
