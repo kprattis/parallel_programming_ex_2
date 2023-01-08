@@ -1,3 +1,4 @@
+
 #ifndef KNN
 #define KNN
 
@@ -41,7 +42,7 @@ knnresult init_knnresult(int k, int m);
 void free_knnresult(knnresult knn);
 
 //select function
-void kselect(double *D, int left, int right, int k, double *dist, int *idx);
+void kselect(double *D, int left, int right, int k, double *ndist, int *nidx, int isknnempty, int shift);
 void swap(double *a, double *b);
 
 //helpers
@@ -49,6 +50,7 @@ double euclidean_norm(double *vec, int d);
 long min(long a, long b);
 void print_arrd(double *arr, int r, int c);
 void print_arri(int *arr, int r, int c);
+
 
 //init query
 void randarr(double *X, int size, double max, double min);

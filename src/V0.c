@@ -12,7 +12,6 @@
 
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 
-
     //Here set the blocksize, which is the reduced size of the dimension n of the distance matrix
     long BLOCKSIZE = n;
 
@@ -30,69 +29,42 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     //Distance array
     double *D = (double *) malloc(m * BLOCKSIZE * sizeof(double));
 
+    double *normx = (double *) malloc(m * sizeof(double));
+    cilk_for(int i = 0; i < m; i++)
+        normx[i] = euclidean_norm(X + i * d, d);
+
+    double *normy = (double *) malloc(BLOCKSIZE * sizeof(double));
+
     //the result
     knnresult knn = init_knnresult(m, k);
-    
-    double *shortest_distances = (double *) malloc(sizeof(double) * 3 * k * m);
-    int *nearest_idxs = (int *) malloc(sizeof(int) * 3 * k * m);
     
     int start, end, size;
     int kval;
 
     for(int b = 0; b < n; b += BLOCKSIZE){
-
         start = b;
         end = min(n, b + BLOCKSIZE);
         size = end - start;
 
+        cilk_for(int i = 0; i < BLOCKSIZE; i++)
+            normy[i] = euclidean_norm(Y + i * d, d);
+
         cilk_for(int i = 0; i < m; i++)
-            cilk_for(int j = start; j < end; j++)
-                D[i * BLOCKSIZE + j - start] = euclidean_norm(X + i * d, d) + euclidean_norm(Y + j * d, d);
+            cilk_for(int j = start; j < end; j++){
+                D[i * BLOCKSIZE + j - start] = normx[i] + normy[j - start];
+            }
 
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, size, d, -2.0, X, d, Y + start * d, d, 1.0 , D, size);
 
-
         kval = min(k, size);
-        cilk_for(int i = 0; i < m; i++){
-
-            kselect(D + i * BLOCKSIZE, 0, size - 1, kval, shortest_distances +  3 * i * k + k * (b != 0), nearest_idxs + 3 * i * k + k * (b != 0)); 
-
-            //modify indexes to be global
-            cilk_for(int j = 0; j < k; j++){
-                nearest_idxs[3 * i * k + k * (b != 0) + j] += start; 
-                nearest_idxs[3 * i * k + k * (b != 0) + j] *= d;
-            }
-        
-            if(b != 0){
-
-                kselect(shortest_distances + 3 * i * k, 0, k + kval - 1, k, shortest_distances + 3 * i * k + 2 * k, nearest_idxs + 3 * i * k + 2 * k);
-
-                cilk_for(int j = 0; j < k; j++){
-                    nearest_idxs[3 * i * k + 2 * k + j] = nearest_idxs[3 * i * k + nearest_idxs[3 * i * k + 2 * k + j]];
-                }
-
-                cilk_for(int j = 0; j < k; j++){
-                    nearest_idxs[3 * i * k + j] = nearest_idxs[3 * i * k + 2 * k + j];
-                    shortest_distances[3 * i * k + j] = shortest_distances[3 * i * k + 2 * k + j];
-                }
-                
-            }
-        }
+        //printf("%d \n", b);
+        cilk_for(int i = 0; i < m; i++)
+            kselect(D + i * BLOCKSIZE, 0, size - 1, kval, knn.ndist + i * k, knn.nidx + i * k, (b == 0), start);
     }
 
+    free(normx);
+    free(normy);
     free(D);
-    
-
-    knn = init_knnresult(m, k);
-    cilk_for(int i = 0; i < m; i++){
-        cilk_for(int j = 0; j < k; j++){
-            knn.nidx[i * k + j] = nearest_idxs[3 * i * k + j];
-            knn.ndist[i * k + j] = shortest_distances[3 * i * k + j];
-        }
-    }
-  
-    free(nearest_idxs);
-    free(shortest_distances);
 
     return knn;
 }
@@ -144,14 +116,11 @@ int main(int argc, char *argv[]){
     struct timeval start_time, end_time;
     double elapsed_time;
     
-    
-
     gettimeofday(&start_time, NULL);
         knnresult knn = kNN(X, Y, n, m, d, k);
         
     gettimeofday(&end_time, NULL);
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
-    
     
     //print_arri(knn.nidx, m, k);
     //print_arrd(knn.ndist, m, k);

@@ -1,6 +1,7 @@
 #include "knn.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 //Init-free functions
 
@@ -52,4 +53,22 @@ void print_arri(int *arr, int r, int c){
         printf("\n");
     }
     printf("\n");
+}
+
+void fprint_arrd(FILE *f, double *arr, int n, int k){
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < k; j++){
+            fprintf(f, "%.3lf ", arr[k * i + j]);
+        }
+         fprintf(f, "\n");
+    }
+}
+
+void fprint_arri(FILE *f, int *arr, int n, int k){
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < k; j++){
+            fprintf(f, "%d ", arr[k * i + j]);
+        }
+         fprintf(f, "\n");
+    }
 }
