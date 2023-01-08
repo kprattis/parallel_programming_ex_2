@@ -119,7 +119,7 @@ int main(int argc, char *argv[]){
     int tid, numtasks;
     MPI_Comm_rank( MPI_COMM_WORLD , &tid);
     MPI_Comm_size( MPI_COMM_WORLD , &numtasks);
-    
+    printf("%d\n", numtasks);
     int N = 12, d = 1, k = 2, n;
 
     int IhaveWritten = 1;
