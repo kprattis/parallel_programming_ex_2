@@ -64,12 +64,13 @@ void kselect(double *D, int left, int right, int k, double *ndist, int *nidx, in
     int n = right - left + 1;
     int *indices = (int *) malloc(sizeof(int) * n);
 
+    int kval = min(k, n);
+
     cilk_for(int i = 0; i < n; i++){
         indices[i] = shift + i;
     }
 
-
-    quickselect(D, indices, 0, n - 1, k);
+    quickselect(D, indices, 0, n - 1, kval);
     
     if(isknnempty){
         cilk_spawn memcpy(ndist, D, k * sizeof(double));
@@ -79,17 +80,19 @@ void kselect(double *D, int left, int right, int k, double *ndist, int *nidx, in
     }
     else{
         
-        double *mergeddists = (double *) malloc(sizeof(double) * 2 * k);
+        double *mergeddists = (double *) malloc(sizeof(double) * (k + kval));
         cilk_spawn memcpy(mergeddists, ndist, sizeof(double) * k);
-        cilk_spawn memcpy(mergeddists + k, D, k * sizeof(double));
+        cilk_spawn memcpy(mergeddists + k, D, kval * sizeof(double));
         
-        int *mergedidx = (int *) malloc(sizeof(int) * 2 * k);
+        int *mergedidx = (int *) malloc(sizeof(int) * (k + kval));
         cilk_spawn memcpy(mergedidx, nidx, sizeof(int) * k);
-        memcpy(mergedidx + k, indices, k * sizeof(int));
+        memcpy(mergedidx + k, indices, kval * sizeof(int));
+
+        free(indices);
 
         cilk_sync;
 
-        quickselect(mergeddists, mergedidx, 0, 2 * k - 1, k);
+        quickselect(mergeddists, mergedidx, 0, kval + k - 1, k);
         cilk_spawn memcpy(ndist, mergeddists, k * sizeof(double));
         memcpy(nidx, mergedidx, k * sizeof(int));
         
@@ -99,7 +102,7 @@ void kselect(double *D, int left, int right, int k, double *ndist, int *nidx, in
         free(mergedidx);
         free(mergeddists);
     }
-    free(indices);
+
 
 }
 

@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <cilk/cilk_api.h>
 #include <cilk/cilk.h>
 #include <string.h>
 
@@ -39,27 +40,26 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
     knnresult knn = init_knnresult(m, k);
     
     int start, end, size;
-    int kval;
 
     for(int b = 0; b < n; b += BLOCKSIZE){
         start = b;
         end = min(n, b + BLOCKSIZE);
         size = end - start;
 
-        cilk_for(int i = 0; i < BLOCKSIZE; i++)
-            normy[i] = euclidean_norm(Y + i * d, d);
+        cilk_for(int i = 0; i < size; i++)
+            normy[i] = euclidean_norm(Y + (i + start) * d, d);
 
         cilk_for(int i = 0; i < m; i++)
-            cilk_for(int j = start; j < end; j++){
-                D[i * BLOCKSIZE + j - start] = normx[i] + normy[j - start];
+            cilk_for(int j = 0; j < size; j++){
+                D[i * size + j] = normx[i] + normy[j];
             }
 
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, m, size, d, -2.0, X, d, Y + start * d, d, 1.0 , D, size);
 
-        kval = min(k, size);
         //printf("%d \n", b);
         cilk_for(int i = 0; i < m; i++)
-            kselect(D + i * BLOCKSIZE, 0, size - 1, kval, knn.ndist + i * k, knn.nidx + i * k, (b == 0), start);
+            kselect(D + i * size, 0, size - 1, k, knn.ndist + i * k, knn.nidx + i * k, (b == 0), start);
+    
     }
 
     free(normx);
@@ -72,20 +72,27 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 int main(int argc, char *argv[]){
     int n, m, k, d;
     double *X, *Y;
-
+    printf("Cilk workers used : %d\n", __cilkrts_get_nworkers());
     int yfree = 1;
 
     if(argc < 2){
-        n = 10;
-        m = 1; 
-        k = 4; 
+        n = 17;
+        m = 17; 
+        k = 3; 
         d = 1;
         
         X = (double *) malloc(sizeof(double) * m * d);
         Y = (double *) malloc(sizeof(double) * n * d);
         
-        randarr(X, m * d, 5.0, -5.0);
-        randarr(Y, n * d, 2.0, -2.0);
+        FILE *f = fopen("input.txt", "r");
+        for(int i = 0; i < n; i++){
+            fscanf(f, "%lf\n", &X[i]);
+            Y[i] = X[i];
+        }
+        fclose(f);
+
+        //randarr(X, m * d, 5.0, -5.0);
+        //randarr(Y, n * d, 2.0, -2.0);
     }
     else if(argc == 2){
         int rows, cols;
