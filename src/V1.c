@@ -150,7 +150,7 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank( MPI_COMM_WORLD , &tid);
     MPI_Comm_size( MPI_COMM_WORLD , &numtasks);
 
-    int N = 17, d = 1, k = 3, n;
+    int N = 1000, d = 3, k = 25, n;
     int chunk = N / numtasks;
     int start = tid * chunk;
     int end = (tid == numtasks - 1) ? N  : (tid + 1) * chunk;
@@ -162,10 +162,10 @@ int main(int argc, char *argv[]){
     
     double temp;
     for(int i = 0; i < start; i++){
-        fscanf(f, "%lf\n", &temp);
+        fscanf(f, "%lf %lf %lf \n", &temp, &temp, &temp);
     }
     for(int i = start; i < end; i++){
-        fscanf(f, "%lf\n", &X[i - start]);
+        fscanf(f, "%lf %lf %lf \n", X + (i - start) * d, X + (i - start) * d + 1, X + (i - start) * d + 2);
     }
 
     fclose(f);

@@ -76,9 +76,9 @@ int main(int argc, char *argv[]){
     int yfree = 1;
 
     if(argc < 2){
-        n = 17;
-        m = 17; 
-        k = 3; 
+        n = 1000;
+        m = n; 
+        k = 25; 
         d = 1;
         
         X = (double *) malloc(sizeof(double) * m * d);
@@ -86,13 +86,14 @@ int main(int argc, char *argv[]){
         
         FILE *f = fopen("input.txt", "r");
         for(int i = 0; i < n; i++){
-            fscanf(f, "%lf\n", &X[i]);
+            fscanf(f, "%lf %lf %lf \n", X + i * d, X + i * d + 1, X + i * d + 2);
             Y[i] = X[i];
         }
         fclose(f);
 
         //randarr(X, m * d, 5.0, -5.0);
         //randarr(Y, n * d, 2.0, -2.0);
+        yfree = 1;
     }
     else if(argc == 2){
         int rows, cols;
@@ -134,8 +135,9 @@ int main(int argc, char *argv[]){
     printf("Execution Time, %lf\n", elapsed_time);
 
     free_knnresult(knn);
-    free(X);
+    
+    //free(X);
     if(yfree)
-        free(Y);
+        //free(Y);
     return 0;
 }
