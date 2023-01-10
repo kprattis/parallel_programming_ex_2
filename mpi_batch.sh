@@ -14,9 +14,7 @@ export OMPI_CC=gcc
 git clone https://github.com/kprattis/parallel_programming_ex_2
 cd parallel_programming_ex_2
 
-make mpi CC=clang 
-
-#HPCFLAGS=-Ι$OPENBLAS_ROOT/include
+make mpi CC=clang HPCFLAGS=-Ι"$OPENBLAS_ROOT/include"
 
 srun bin/knn_mpi
 

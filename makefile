@@ -13,7 +13,7 @@ EXEC = $(BIN)/knn $(BIN)/knn_mpi
 
 OBJFILES = $(addprefix $(OBJ)/, select.o helpers.o query_init.o)
 
-HPCFLAGS = -I$(INC)
+HPCBLASINC = $(INC)
 
 NPROCS = 4 
 
@@ -29,15 +29,15 @@ run: $(EXEC)
 
 $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	mkdir -p $(BIN)
-	$(CC) -o $@ $^ $(HPCFLAGS) $(CFLAGS) $(LFLAGS)
+	$(CC) -o $@ $^ -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS)
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
 	mkdir -p $(BIN)
-	mpicc -o $@ $^ $(HPCFLAGS) $(CFLAGS) $(LFLAGS) 
+	mpicc -o $@ $^ -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) 
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
-	$(CC) -c -o $@ $^ $(HPCFLAGS) $(CFLAGS) 
+	$(CC) -c -o $@ $^ -I$(HPCBLASINC) $(CFLAGS) 
 
 clean:
 	rm -f $(OBJ)/*.o $(EXEC)
