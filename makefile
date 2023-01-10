@@ -33,11 +33,11 @@ $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
 	mkdir -p $(BIN)
-	mpicc -o $@ $^ $(CFLAGS) $(LFLAGS) $(HPCFLAGS)
+	mpicc -o $@ $^ $(HPCFLAGS) $(CFLAGS) $(LFLAGS) 
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
-	$(CC) -c -o $@ $^ $(CFLAGS) $(HPCFLAGS)
+	$(CC) -c -o $@ $^ $(HPCFLAGS) $(CFLAGS) 
 
 clean:
 	rm -f $(OBJ)/*.o $(EXEC)
