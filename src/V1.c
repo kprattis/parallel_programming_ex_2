@@ -137,8 +137,8 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N){
 }
 
 int main(int argc, char *argv[]){
-    char resultsfile[] = "results.txt";
-    char inputfile[] = "input.txt";
+    char resultsfile[] = "results/results.txt";
+    char inputfile[] = "inputs/input.txt";
 
     FILE *f;
     

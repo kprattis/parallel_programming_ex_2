@@ -11,14 +11,6 @@ module load OpenCilk
 
 export OMPI_CC=clang
 
-git clone https://github.com/kprattis/parallel_programming_ex_2
-cd parallel_programming_ex_2
-
 make mpi CC=clang HPCBLASINC="$OPENBLAS_ROOT/include" LBLAS=$OPENBLAS_ROOT/lib
 
 srun bin/knn_mpi
-
-cd ..
-
-#rm -r parallel_programming_ex_2
-#rmdir parallel_programming_ex_2
