@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --partition=batch
+#SBATCH --partition=rome
 #SBATCH --ntasks-per-node=2
 #SBATCH --nodes=2
 #SBATCH --time=00:00:30
