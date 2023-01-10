@@ -137,9 +137,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N){
 }
 
 int main(int argc, char *argv[]){
-    char resultsfile[] = "results/results.txt";
-    char inputfile[] = "inputs/input.txt";
-
+    
     FILE *f;
     
     MPI_Init(&argc, &argv);
@@ -161,6 +159,7 @@ int main(int argc, char *argv[]){
     
     double temp;
     if(tid == 0){
+        char inputfile[] = "inputs/input.txt";
         f = fopen(inputfile, "r");
         for(int p = 0; p < numtasks - 1; p++){
             for(int i = start; i < end; i ++){
@@ -206,6 +205,7 @@ int main(int argc, char *argv[]){
 
     //print results in file. Send all results to the proccess 0.
     if(tid == 0){
+        char resultsfile[] = "results/results.txt";
         
         for(int i = 1; i < numtasks; i++){
             MPI_Recv(&othertime, 1, MPI_DOUBLE , i , i * 100 + 3 , MPI_COMM_WORLD, &mpistat);
