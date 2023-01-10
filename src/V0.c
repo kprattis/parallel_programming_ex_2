@@ -79,18 +79,22 @@ int main(int argc, char *argv[]){
         n = 1000;
         m = n; 
         k = 25; 
-        d = 1;
+        d = 3;
         
         X = (double *) malloc(sizeof(double) * m * d);
         Y = (double *) malloc(sizeof(double) * n * d);
         
-        FILE *f = fopen("input.txt", "r");
-        for(int i = 0; i < n; i++){
+        FILE *f = fopen("inputs/input.txt", "r");
+        
+        for(int i = 0; i < m; i++){
             fscanf(f, "%lf %lf %lf \n", X + i * d, X + i * d + 1, X + i * d + 2);
-            Y[i] = X[i];
+            Y[i * d] = X[i * d];
+            Y[i * d + 1] = X[i * d + 1];
+            Y[i * d + 2] = X[i * d + 2];
         }
+        
         fclose(f);
-
+        
         //randarr(X, m * d, 5.0, -5.0);
         //randarr(Y, n * d, 2.0, -2.0);
         yfree = 1;
@@ -136,8 +140,8 @@ int main(int argc, char *argv[]){
 
     free_knnresult(knn);
     
-    //free(X);
+    free(X);
     if(yfree)
-        //free(Y);
+        free(Y);
     return 0;
 }
