@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --partition=batch
 #SBATCH --ntasks-per-node=1
-#SBATCH --nodes=1
+#SBATCH --nodes=4
 #SBATCH --time=0:01:00
-#SBATCH --cpus-per-task=12 
+#SBATCH --cpus-per-task=2 
 
 module load gcc/9.4.0 openmpi/4.1.2
 module load openblas
