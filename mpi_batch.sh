@@ -13,4 +13,4 @@ export OMPI_CC=clang
 
 make mpi CC=clang HPCBLASINC="$OPENBLAS_ROOT/include" LBLAS=$OPENBLAS_ROOT/lib
 
-srun bin/knn_mpi
+srun -n 4 bin/knn_mpi
