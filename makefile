@@ -30,15 +30,15 @@ run: $(EXEC)
 
 $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	mkdir -p $(BIN)
-	$(CC) -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) $(LBLAS) -o $@ $^ 
+	$(CC) -I$(HPCBLASINC) $(CFLAGS) $^ $(LFLAGS) $(LBLAS) -o $@  
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
 	mkdir -p $(BIN)
-	mpicc -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) $(LBLAS) -o $@ $^ 
+	mpicc -I$(HPCBLASINC) $(CFLAGS) $^ $(LFLAGS) $(LBLAS) -o $@ 
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
-	$(CC) -c -o $@ $^ $(CFLAGS) 
+	$(CC) -c $^ $(CFLAGS) -o $@ 
 
 clean:
 	rm -f $(OBJ)/*.o $(EXEC)
