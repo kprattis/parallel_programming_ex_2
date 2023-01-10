@@ -4,18 +4,24 @@ BIN = bin
 SRC = src
 INC = inc
 
-CC = ~/Downloads/OpenCilk-2.0.0-x86_64-Linux-Ubuntu-22.04/bin/clang
+CC = ~/Desktop/opencilk/bin/clang
 
 CFLAGS = -O3 -I$(INC) -fopencilk
-LFLAGS = -lopenblas -lpthread
+LFLAGS = -lopenblas -lpthread 
 
 EXEC = $(BIN)/knn $(BIN)/knn_mpi
 
 OBJFILES = $(addprefix $(OBJ)/, select.o helpers.o query_init.o)
 
+HPCFLAGS = -I$(INC)
+
 NPROCS = 4 
 
 all: $(EXEC)
+
+mpi: $(BIN)/knn_mpi
+
+V0: $(BIN)/knn
 
 run: $(EXEC)
 	./$< 
@@ -27,15 +33,17 @@ $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
 	mkdir -p $(BIN)
-	mpicc -o $@ $^ $(CFLAGS) $(LFLAGS)
+	mpicc -o $@ $^ $(CFLAGS) $(LFLAGS) $(HPCFLAGS)
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
-	$(CC) -c -o $@ $^ $(CFLAGS)
+	$(CC) -c -o $@ $^ $(CFLAGS) $(HPCFLAGS)
 
 clean:
 	rm -f $(OBJ)/*.o $(EXEC)
-	
+
+.PHONY: mpi clean purge run V0
+
 purge:
 	make clean
 	@ mkdir -p $(OBJ)

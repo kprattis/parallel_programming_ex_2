@@ -145,6 +145,7 @@ int main(int argc, char *argv[]){
     MPI_Init(&argc, &argv);
 
     MPI_Status mpistat;
+    MPI_Request mpireq;
 
     int tid, numtasks;
     MPI_Comm_rank( MPI_COMM_WORLD , &tid);
@@ -155,21 +156,42 @@ int main(int argc, char *argv[]){
     int start = tid * chunk;
     int end = (tid == numtasks - 1) ? N  : (tid + 1) * chunk;
     n = end - start;
-    double *X = (double *) malloc(sizeof(double) * n * d);
 
-
-    f = fopen(inputfile, "r");
+    double *X = (double *) malloc(n * d * sizeof(double));
     
     double temp;
-    for(int i = 0; i < start; i++){
-        fscanf(f, "%lf %lf %lf \n", &temp, &temp, &temp);
-    }
-    for(int i = start; i < end; i++){
-        fscanf(f, "%lf %lf %lf \n", X + (i - start) * d, X + (i - start) * d + 1, X + (i - start) * d + 2);
-    }
+    if(tid == 0){
+        f = fopen(inputfile, "r");
+        for(int p = 0; p < numtasks - 1; p++){
+            for(int i = start; i < end; i ++){
+                fscanf(f, "%lf %lf %lf \n", X + (i - start) * d, X + (i - start) * d + 1, X + (i - start) * d + 2);
+            }
+            if(p > 0)
+                MPI_Isend(X, n * d, MPI_DOUBLE , p , 100 , MPI_COMM_WORLD, &mpireq);
+        }
 
-    fclose(f);
+        X = realloc(X, (N - (numtasks - 1) * chunk) * d * sizeof(double));
+        for(int i = (numtasks - 1) * chunk; i < N; i ++){
+                fscanf(f, "%lf %lf %lf \n", X + (i - (numtasks - 1) * chunk) * d, X + (i - (numtasks - 1) * chunk) * d + 1, X + (i - (numtasks - 1) * chunk) * d + 2);
+        }
+        MPI_Isend(X, (N - (numtasks - 1) * chunk) * d, MPI_DOUBLE , numtasks - 1 , 100 , MPI_COMM_WORLD, &mpireq);
+        
+        fclose(f);
+        
+        X = realloc(X, n * d * sizeof(double));
+        f = fopen(inputfile,"r");
+        for(int i = start; i < end; i ++){
+                fscanf(f, "%lf %lf %lf \n", X + (i - start) * d, X + (i - start) * d + 1, X + (i - start) * d + 2);
+        }
+        fclose(f);
+
+    }
+    else{
+        MPI_Recv(X, n * d, MPI_DOUBLE , 0 , 100 , MPI_COMM_WORLD, &mpistat);
+    }
     
+    MPI_Barrier(MPI_COMM_WORLD);
+
     struct timeval start_time, end_time;
     double elapsed_time;
     gettimeofday(&start_time, NULL);
