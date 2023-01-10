@@ -29,7 +29,7 @@ run: $(EXEC)
 
 $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	mkdir -p $(BIN)
-	$(CC) -o $@ $^ $(CFLAGS) $(LFLAGS)
+	$(CC) -o $@ $^ $(HPCFLAGS) $(CFLAGS) $(LFLAGS)
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
 	mkdir -p $(BIN)
@@ -41,8 +41,6 @@ $(OBJ)/%.o: $(SRC)/%.c
 
 clean:
 	rm -f $(OBJ)/*.o $(EXEC)
-
-.PHONY: mpi clean purge run V0
 
 purge:
 	make clean
