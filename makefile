@@ -7,7 +7,8 @@ INC = inc
 CC = ~/Desktop/opencilk/bin/clang
 
 CFLAGS = -O3 -I$(INC) -fopencilk
-LFLAGS = -lopenblas -lpthread 
+LFLAGS = -lpthread 
+LBLAS = -lopenblas
 
 EXEC = $(BIN)/knn $(BIN)/knn_mpi
 
@@ -29,15 +30,15 @@ run: $(EXEC)
 
 $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	mkdir -p $(BIN)
-	$(CC) -o $@ $^ -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS)
+	$(CC) -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) $(LBLAS) -o $@ $^ 
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
 	mkdir -p $(BIN)
-	mpicc -o $@ $^ -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) 
+	mpicc -o -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) $(LBLAS) $@ $^ 
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
-	$(CC) -c -o $@ $^ -I$(HPCBLASINC) $(CFLAGS) 
+	$(CC) -c -o $@ $^ $(CFLAGS) 
 
 clean:
 	rm -f $(OBJ)/*.o $(EXEC)
