@@ -9,12 +9,12 @@ module load gcc/9.4.0 openmpi/4.1.2
 module load openblas
 module load OpenCilk
 
-export OMPI_CC=gcc
+export OMPI_CC=clang
 
 git clone https://github.com/kprattis/parallel_programming_ex_2
 cd parallel_programming_ex_2
 
-make mpi CC=clang HPCFLAGS=-Ι"$OPENBLAS_ROOT/include"
+make mpi CC=clang HPCBLASINC="$OPENBLAS_ROOT/include"
 
 srun bin/knn_mpi
 

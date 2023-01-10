@@ -34,7 +34,7 @@ $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
 	mkdir -p $(BIN)
-	mpicc -o -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) $(LBLAS) $@ $^ 
+	mpicc -I$(HPCBLASINC) $(CFLAGS) $(LFLAGS) $(LBLAS) -o $@ $^ 
 	
 $(OBJ)/%.o: $(SRC)/%.c
 	mkdir -p $(OBJ)
