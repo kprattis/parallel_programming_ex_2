@@ -26,6 +26,7 @@ mpi: $(BIN)/knn_mpi
 V0: $(BIN)/knn
 
 bin/reg_grid: $(SRC)/reg_grid.c
+	mkdir -p $(BIN) 
 	$(CC) -O3 $^ -o $@ -lm
 
 $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
