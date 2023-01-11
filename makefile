@@ -7,7 +7,7 @@ INC = inc
 CC = ~/Desktop/opencilk/bin/clang
 
 CFLAGS = -O3 -I$(INC) -fopencilk
-LFLAGS = -lpthread -lopenblas 
+LFLAGS = -lpthread -lopenblas -lm
 LBLAS = ""
 
 EXEC = $(BIN)/knn $(BIN)/knn_mpi
@@ -18,15 +18,15 @@ HPCBLASINC = $(INC)
 
 NPROCS = 4 
 
-all: $(EXEC)
-
+all: $(EXEC) bin/reg_grid
+	@ mkdir -p inputs
+	@ mkdir -p results
 mpi: $(BIN)/knn_mpi
 
 V0: $(BIN)/knn
 
-run: $(EXEC)
-	./$< 
-	mpiexec -n $(NPROCS) $(BIN)/knn_mpi
+bin/reg_grid: $(SRC)/reg_grid.c
+	gcc -O3 $^ -o $@ -lm
 
 $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	mkdir -p $(BIN)
@@ -41,7 +41,7 @@ $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) -c $^ $(CFLAGS) -o $@ 
 
 clean:
-	rm -f $(OBJ)/*.o $(EXEC)
+	rm -f $(OBJ)/*.o $(EXEC) bin/reg_grid
 
 purge:
 	make clean

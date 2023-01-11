@@ -5,4 +5,4 @@
 #SBATCH --time=00:00:30
 #SBATCH --cpus-per-task=5
 
-srun -n4 bin/knn_mpi
+srun bin/knn_mpi

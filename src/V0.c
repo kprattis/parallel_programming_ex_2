@@ -75,56 +75,37 @@ int main(int argc, char *argv[]){
     printf("Cilk workers used : %d\n", __cilkrts_get_nworkers());
     int yfree = 1;
 
-    if(argc < 2){
-        n = 1000;
-        m = n; 
-        k = 25; 
-        d = 3;
-        
+    if(argc == 3){
+                
+        FILE *f = fopen(argv[1], "r");
+        if(f == NULL){
+            printf("Error: Could not open file %s\n", argv[1]);
+        }
+        printf("Processing file %s\n", argv[1]);
+        fscanf(f, "%d %d\n", &n, &d);
+        k = pow(3, d);
+        m = n;
+
         X = (double *) malloc(sizeof(double) * m * d);
-        Y = (double *) malloc(sizeof(double) * n * d);
         
-        FILE *f = fopen("inputs/input.txt", "r");
-        
+
         for(int i = 0; i < m; i++){
-            fscanf(f, "%lf %lf %lf \n", X + i * d, X + i * d + 1, X + i * d + 2);
-            Y[i * d] = X[i * d];
-            Y[i * d + 1] = X[i * d + 1];
-            Y[i * d + 2] = X[i * d + 2];
+            for(int j = 0; j < d; j++){
+                fscanf(f, "%lf ", X + i * d + j);
+            }
+            fscanf(f, "\n");
         }
         
         fclose(f);
-        
-        //randarr(X, m * d, 5.0, -5.0);
-        //randarr(Y, n * d, 2.0, -2.0);
-        yfree = 1;
-    }
-    else if(argc == 2){
-        int rows, cols;
-        k = 5;
-        X = read_MNIST_images(argv[1], &m, &rows, &cols);
 
-        d = rows * cols;
-        n = m;
         Y = X;
         yfree = 0;
     }
-    else if(argc == 3){
-        int rows, cols;
-        k = 5;
-        X = read_MNIST_images(argv[1], &m, &rows, &cols);
-        d = rows * cols;
-        Y = read_MNIST_images(argv[2], &n, &rows, &cols);
-        yfree = 1;
-    }
     else{
-        fprintf(stderr, "Wrong number of inputs, expected 0 or 1 but got %d.\nInput a filename containing the data for X to be copied to Y or 2 filenames for X and Y or nothing for a random example.\n", argc - 1);
+        printf("Wrong input: %d arguments. Right usage: bin/knn inputs/infile.txt outputs/outfile.txt\n", argc);
         exit(1);
     }
     
-    //print_arrd(X, m, d);
-    //print_arrd(Y, n, d);
-
     struct timeval start_time, end_time;
     double elapsed_time;
     
@@ -134,9 +115,33 @@ int main(int argc, char *argv[]){
     gettimeofday(&end_time, NULL);
     elapsed_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1000000.0;
     
-    //print_arri(knn.nidx, m, k);
-    //print_arrd(knn.ndist, m, k);
     printf("Execution Time, %lf\n", elapsed_time);
+
+    FILE *f = fopen(argv[2], "w");
+    if(f == NULL){
+        printf("Error, could not open file %s\n", argv[2]);
+        exit(1);
+    }
+
+    fprintf(f, "Execution Time : %lf, cilk workers: %d\n", elapsed_time, __cilkrts_get_nworkers());
+
+    for(int i = 0; i < m; i++){
+        for(int j = 0; j < k; j++){
+            fprintf(f, "%d ", knn.nidx[i * k + j]);
+        }
+        fprintf(f, "\n");
+    }
+
+    fprintf(f, "\n");
+
+    for(int i = 0; i < m; i++){
+        for(int j = 0; j < k; j++){
+            fprintf(f, "%.3lf ", knn.ndist[i * k + j]);
+        }
+        fprintf(f, "\n");
+    }
+
+    fclose(f);
 
     free_knnresult(knn);
     
@@ -145,3 +150,14 @@ int main(int argc, char *argv[]){
         free(Y);
     return 0;
 }
+
+/*
+else if(argc == 3){
+        int rows, cols;
+        k = 5;
+        X = read_MNIST_images(argv[1], &m, &rows, &cols);
+        d = rows * cols;
+        Y = read_MNIST_images(argv[2], &n, &rows, &cols);
+        yfree = 1;
+    }
+    */

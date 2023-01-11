@@ -29,17 +29,15 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N){
     
     int m = N - (numtasks - 1) * (N/numtasks);
     
-
     long BLOCKSIZE = m;
     if ( (long) BLOCKSIZE * BLOCKSIZE > MAXSIZE){
         BLOCKSIZE = min( (long)BLOCKSIZE * BLOCKSIZE / 4, MAXSIZE) / BLOCKSIZE;   
     }
 
-
     printf("I am proccess %d and my distance matrix will have size: %d x %ld\n", tid , n, BLOCKSIZE);
-    if(BLOCKSIZE < k){
+    if(BLOCKSIZE < k || n < k){
         printf("too large sizes or too small k, n = %d, d = %d\n", n, d);
-        exit(1);
+        MPI_Abort(MPI_COMM_WORLD , 1);
     }
 
     //Distance array
@@ -91,6 +89,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N){
                     D[i * size + j] = normx[i] + normy[j];
                 }
 
+            
 
             cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, n, size, d, -2.0, X, d, Y + start * d, d, 1.0 , D, size);       
 
@@ -98,8 +97,6 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N){
                 kselect(D + i * size, 0, size - 1, k, knn.ndist + i * k, knn.nidx + i * k, (b == 0) && (round == 0), start + originID * (N / numtasks));
         }
         //--------------------End of own points Calculation----------------------------
-        
-        //
         if(tid != numtasks - 1){
             if(round == tid){
                 m = N - (numtasks - 1) * (N/numtasks);
@@ -116,7 +113,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N){
         
         if(round < numtasks - 1)
             MPI_Recv(Z, m * d, MPI_DOUBLE , src , 1000 , MPI_COMM_WORLD, &mpistat);
-
+        
         originID = (originID == 0) ? numtasks - 1 : originID - 1;
 
         MPI_Wait(&mpireq, &mpistat);
@@ -132,7 +129,7 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N){
     free(D);
     free(normx);
     free(normy);
-
+    
     return knn;
 }
 
@@ -149,7 +146,7 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank( MPI_COMM_WORLD , &tid);
     MPI_Comm_size( MPI_COMM_WORLD , &numtasks);
 
-    int N = 1000, d = 3, k = 25, n;
+    int N = 1000, d = 3, k = 27, n;
     int chunk = N / numtasks;
     int start = tid * chunk;
     int end = (tid == numtasks - 1) ? N  : (tid + 1) * chunk;
@@ -159,34 +156,60 @@ int main(int argc, char *argv[]){
     
     double temp;
     if(tid == 0){
-        char inputfile[] = "inputs/input.txt";
-        f = fopen(inputfile, "r");
+        if(argc != 3){
+            printf("Wrong input: %d arguments. Right argument usage: inputs/infile.txt outputs/outfile.txt\n", argc);
+            MPI_Abort( MPI_COMM_WORLD, 1);
+        }
+    }
+
+    if(tid == 0){
+
+        f = fopen(argv[1], "r");
+
+        if(f == NULL){
+            printf("Could not open file %s\n", argv[1]);
+            MPI_Abort( MPI_COMM_WORLD, 1);
+        }
+
+        fscanf(f, "%d %d\n", &N, &d);
+
         for(int p = 0; p < numtasks - 1; p++){
             for(int i = start; i < end; i ++){
-                fscanf(f, "%lf %lf %lf \n", X + (i - start) * d, X + (i - start) * d + 1, X + (i - start) * d + 2);
+                for(int j = 0; j < d; j++){
+                    fscanf(f, "%lf ", X + (i - start) * d + j);
+                }
+                fscanf(f, "\n");
             }
             if(p > 0)
-                MPI_Isend(X, n * d, MPI_DOUBLE , p , 100 , MPI_COMM_WORLD, &mpireq);
+                MPI_Send(X, n * d, MPI_DOUBLE , p , 100 , MPI_COMM_WORLD);
         }
 
         X = realloc(X, (N - (numtasks - 1) * chunk) * d * sizeof(double));
         for(int i = (numtasks - 1) * chunk; i < N; i ++){
-                fscanf(f, "%lf %lf %lf \n", X + (i - (numtasks - 1) * chunk) * d, X + (i - (numtasks - 1) * chunk) * d + 1, X + (i - (numtasks - 1) * chunk) * d + 2);
+            for(int j = 0; j < d; j++){
+                fscanf(f, "%lf ", X + (i - (numtasks - 1) * chunk) * d + j);
+            }
+            fscanf(f, "\n");
         }
-        MPI_Isend(X, (N - (numtasks - 1) * chunk) * d, MPI_DOUBLE , numtasks - 1 , 100 , MPI_COMM_WORLD, &mpireq);
+        
+        MPI_Send(X, (N - (numtasks - 1) * chunk) * d, MPI_DOUBLE , numtasks - 1 , 100 , MPI_COMM_WORLD);
         
         fclose(f);
         
         X = realloc(X, n * d * sizeof(double));
-        f = fopen(inputfile,"r");
+        f = fopen(argv[1],"r");
+        fscanf(f, "%d %d\n", &N, &d);
         for(int i = start; i < end; i ++){
-                fscanf(f, "%lf %lf %lf \n", X + (i - start) * d, X + (i - start) * d + 1, X + (i - start) * d + 2);
+            for(int j = 0; j < d; j++){
+                fscanf(f, "%lf ", X + (i - start) * d + j);
+            }
+            fscanf(f, "\n");
         }
         fclose(f);
 
     }
     else{
-        MPI_Recv(X, n * d, MPI_DOUBLE , 0 , 100 , MPI_COMM_WORLD, &mpistat);
+        MPI_Recv(X, n * d, MPI_DOUBLE , 0 , 100 , MPI_COMM_WORLD, &mpistat);         
     }
     
     MPI_Barrier(MPI_COMM_WORLD);
@@ -205,7 +228,6 @@ int main(int argc, char *argv[]){
 
     //print results in file. Send all results to the proccess 0.
     if(tid == 0){
-        char resultsfile[] = "results/results.txt";
         
         for(int i = 1; i < numtasks; i++){
             MPI_Recv(&othertime, 1, MPI_DOUBLE , i , i * 100 + 3 , MPI_COMM_WORLD, &mpistat);
@@ -214,8 +236,11 @@ int main(int argc, char *argv[]){
         printf("Execution Time, %lf\n", elapsed_time);
 
 
-        f = fopen(resultsfile, "w");
-        
+        f = fopen(argv[2], "w");
+        if(f == NULL){
+            printf("Could not open file %s\n", argv[2]);
+            MPI_Abort( MPI_COMM_WORLD, 1);
+        }
         fprint_arrd(f, knn.ndist, n, k);
 
         for(int i = 1; i < numtasks - 1; i++){
