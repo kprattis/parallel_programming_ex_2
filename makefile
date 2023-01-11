@@ -53,4 +53,6 @@ purge:
 	@ mkdir -p $(BIN)
 	rmdir $(OBJ)
 	rmdir $(BIN)
+	rmdir results
+	rmdir inputs
 	
