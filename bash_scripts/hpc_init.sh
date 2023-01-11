@@ -6,4 +6,6 @@ module load OpenCilk
 
 export OMPI_CC=clang
 
-make CC=clang HPCBLASINC="$OPENBLAS_ROOT/include" LBLAS=$OPENBLAS_ROOT/lib
+make mpi CC=clang HPCBLASINC="$OPENBLAS_ROOT/include" LBLAS=$OPENBLAS_ROOT/lib
+
+make bin/reg_grid
