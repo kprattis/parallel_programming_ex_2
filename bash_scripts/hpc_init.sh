@@ -1,5 +1,7 @@
 #!/bin/bash
 
+chmod +x bash_scripts/*
+
 module load gcc/9.4.0 openmpi/4.1.2
 
 make bin/reg_grid CC=gcc
