@@ -139,6 +139,8 @@ int main(int argc, char *argv[]){
     
     MPI_Init(&argc, &argv);
 
+
+
     MPI_Status mpistat;
     MPI_Request mpireq;
 
@@ -146,7 +148,39 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank( MPI_COMM_WORLD , &tid);
     MPI_Comm_size( MPI_COMM_WORLD , &numtasks);
 
-    int N = 1000, d = 3, k = 27, n;
+    if(tid == 0){
+        if(argc != 3){
+            printf("Wrong input: %d arguments. Right argument usage: inputs/infile.txt outputs/outfile.txt\n", argc);
+            MPI_Abort( MPI_COMM_WORLD, 1);
+        }
+    }
+
+
+    int N, d, k, n;
+
+    if(tid == 0){
+        f = fopen(argv[1], "r");
+        if(f == NULL){
+            printf("Could not open file %s\n", argv[1]);
+            MPI_Abort( MPI_COMM_WORLD, 1);
+        }
+        fscanf(f, "%d %d\n", &N, &d);
+        fclose(f);
+
+        for(int i = 1; i < numtasks; i++){
+            MPI_Send(&N, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            MPI_Send(&d, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
+        }
+    }
+    else{
+        MPI_Recv(&N, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &mpistat);
+        MPI_Recv(&d, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &mpistat);
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    k = pow(3, d);
+
     int chunk = N / numtasks;
     int start = tid * chunk;
     int end = (tid == numtasks - 1) ? N  : (tid + 1) * chunk;
@@ -155,12 +189,6 @@ int main(int argc, char *argv[]){
     double *X = (double *) malloc(n * d * sizeof(double));
     
     double temp;
-    if(tid == 0){
-        if(argc != 3){
-            printf("Wrong input: %d arguments. Right argument usage: inputs/infile.txt outputs/outfile.txt\n", argc);
-            MPI_Abort( MPI_COMM_WORLD, 1);
-        }
-    }
 
     if(tid == 0){
 
@@ -237,10 +265,13 @@ int main(int argc, char *argv[]){
 
 
         f = fopen(argv[2], "w");
+
         if(f == NULL){
             printf("Could not open file %s\n", argv[2]);
             MPI_Abort( MPI_COMM_WORLD, 1);
         }
+        fprintf(f, "Execution Time, %lf, Cilk workers %d, Number of tasks %d\n", elapsed_time,  __cilkrts_get_nworkers(), numtasks);
+
         fprint_arrd(f, knn.ndist, n, k);
 
         for(int i = 1; i < numtasks - 1; i++){

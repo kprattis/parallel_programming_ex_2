@@ -22,8 +22,11 @@ all: $(EXEC) bin/reg_grid
 	@ mkdir -p inputs
 	@ mkdir -p results
 mpi: $(BIN)/knn_mpi
-
+	@ mkdir -p inputs
+	@ mkdir -p results
 V0: $(BIN)/knn
+	@ mkdir -p inputs
+	@ mkdir -p results
 
 bin/reg_grid: $(SRC)/reg_grid.c
 	mkdir -p $(BIN) 

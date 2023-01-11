@@ -1,7 +1,5 @@
 #!/bin/bash
 
-make all
-
 dims=(1 2 3 4)
 sizes=(10 50 100 500)
 

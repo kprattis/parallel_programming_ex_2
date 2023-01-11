@@ -1,6 +1,6 @@
 #!/bin/bash
 
-chmod +x bash_scripts/*
+chmod +x scripts/*
 
 module load gcc/9.4.0
 

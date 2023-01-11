@@ -1,7 +1,5 @@
 #!/bin/bash
 
-make all
-
 for f in $(ls inputs/ | grep ".txt")
 do
 
