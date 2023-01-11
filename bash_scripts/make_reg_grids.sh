@@ -12,5 +12,6 @@ do
         
         bin/reg_grid inputs/"rg${d}d${s}".txt $s $d
 
+        echo created inputs/"rg${d}d${s}".txt
     done
 done
