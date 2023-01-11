@@ -4,6 +4,7 @@
 git clone https://github.com/kprattis/parallel_programming_ex_2
 
 cd parallel_programming_ex_2
+
 `````````````
 
 `````````````
@@ -16,4 +17,5 @@ module load OpenCilk
 
 export OMPI_CC=clang
 make mpi CC=clang HPCBLASINC="$OPENBLAS_ROOT/include" LBLAS=$OPENBLAS_ROOT/lib
+
 `````````````
