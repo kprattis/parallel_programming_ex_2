@@ -8,4 +8,4 @@ export OMPI_CC=clang
 
 make mpi CC=clang HPCBLASINC="$OPENBLAS_ROOT/include" LBLAS=$OPENBLAS_ROOT/lib
 
-make bin/reg_grid
+make bin/reg_grid CC=gcc
