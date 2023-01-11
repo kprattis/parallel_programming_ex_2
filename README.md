@@ -10,6 +10,10 @@ cd parallel_programming_ex_2
 `````````````
 chmod +x bash_scripts/*
 
+module load gcc/9.4.0
+
+make bin/reg_grid CC=gcc
+
 module load gcc/9.4.0 openmpi/4.1.2
 
 module load openblas
