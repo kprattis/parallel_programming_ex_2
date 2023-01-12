@@ -127,7 +127,7 @@ int main(int argc, char *argv[]){
 
     for(int i = 0; i < m; i++){
         for(int j = 0; j < k; j++){
-            fprintf(f, "%d ", knn.nidx[i * k + j]);
+            fprintf(f, "%.3lf ", knn.ndist[i * k + j]);
         }
         fprintf(f, "\n");
     }
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
 
     for(int i = 0; i < m; i++){
         for(int j = 0; j < k; j++){
-            fprintf(f, "%.3lf ", knn.ndist[i * k + j]);
+            fprintf(f, "%d ", knn.nidx[i * k + j]);
         }
         fprintf(f, "\n");
     }
