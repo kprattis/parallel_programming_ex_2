@@ -17,7 +17,7 @@ HPCBLASINC = $(INC)
 #--------------change if needed--------------------
 CC = ~/Desktop/opencilk/bin/clang
 
-NPROCS = 4
+NPROCS = 6
 
 #======these to be changed when calling bin/reg_grid ====
 # values per dimension
