@@ -2,6 +2,10 @@
 #include <math.h>
 #include <stdlib.h>
 
+/*
+Create a (square) regular grid in d dimensions of size N per dimension 
+*/
+
 void regular_grid(FILE *f, int dim, double start, double end, double step){
     
     int total_size = 1;
@@ -26,8 +30,8 @@ int main(int argc, char *argv[]){
     
 
     if(argc != 4){
-        printf("Right Usage (supposing current working directory is bin): ./reg_grid filename dimsize d \n");
-        printf("E.g. to make a 10x10x10 regular grid use: ./reg_grid inputs/reg3d10.txt 10 3\n");
+        printf("Right Usage: bin/reg_grid filename N d \n");
+        printf("E.g. to make a 10x10x10 regular grid use: bin/reg_grid inputs/reg3d10.txt 10 3\n");
         exit(1);
     }
     

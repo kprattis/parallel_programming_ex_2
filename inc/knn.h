@@ -1,6 +1,7 @@
-
 #ifndef KNN
 #define KNN
+
+#include <stdio.h>
 
 // Definition of the kNN result struct
 typedef struct knnresult{
@@ -32,6 +33,8 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k);
   \param  d      Number of dimensions            [scalar]
   \param  k      Number of neighbors             [scalar]
 
+  \param N       Number of total data points
+
   \return  The kNN result
 */
 knnresult distrAllkNN(double * X, int n, int d, int k, int N);
@@ -41,19 +44,18 @@ knnresult distrAllkNN(double * X, int n, int d, int k, int N);
 knnresult init_knnresult(int k, int m);
 void free_knnresult(knnresult knn);
 
-//select function
+/*! function to select the k nearest neighbours from array D between positions left - right.
+    isknnempty is a flag showing if the arrays ndist, nidx have already some points as knn from previous iteration.
+    shift specifies the proper index shift show that the function stores the global indices of the points
+*/
 void kselect(double *D, int left, int right, int k, double *ndist, int *nidx, int isknnempty, int shift);
-void swap(double *a, double *b);
 
 //helpers
 double euclidean_norm(double *vec, int d);
 long min(long a, long b);
 void print_arrd(double *arr, int r, int c);
 void print_arri(int *arr, int r, int c);
-
-
-//init query
-void randarr(double *X, int size, double max, double min);
-double * read_MNIST_images(char *filename, int *num_images, int *rows, int *cols);
+void fprint_arrd(FILE *f, double *arr, int n, int k);
+void fprint_arri(FILE *f, int *arr, int n, int k);
 
 #endif

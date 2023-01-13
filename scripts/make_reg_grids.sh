@@ -1,7 +1,7 @@
 #!/bin/bash
 
-dims=(1 2 3 4 5 )
-sizes=(10 50 100 200 )
+dims=( 2 3 )
+sizes=(10 25 50 75 100 )
 
 for d in "${dims[@]}"
 do

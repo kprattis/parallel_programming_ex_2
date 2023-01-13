@@ -2,6 +2,13 @@
 #include <math.h>
 #include <stdlib.h>
 
+
+/*
+This program performs a test for the knn results of V0 and V1. 
+It is designed to verify that in a 2d 3d (and 4d) regular grid 
+the inside points have been calculated correctly.
+*/
+
 int factorial(int a){
     if(a == 0)
         return 1;

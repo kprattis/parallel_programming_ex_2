@@ -6,7 +6,6 @@
 #include <cilk/cilk_api.h>
 #include <pthread.h>
 
-
 void swap(double *a, double *b){
     double temp = *a;
     *a = *b;
@@ -40,6 +39,7 @@ int partition(double* D, int *indices, int left, int right, int pivot_index){
     return new_pivot_index;
 }
 
+//quick selest algorithm (modified to take the indices)
 double quickselect(double* D, int *indices, int left, int right, int k){
     if(left == right)
         return D[left];
@@ -59,6 +59,7 @@ double quickselect(double* D, int *indices, int left, int right, int k){
     
 }
 
+//This is used to select the knn.
 void kselect(double *D, int left, int right, int k, double *ndist, int *nidx, int isknnempty, int shift){
     
     int n = right - left + 1;
