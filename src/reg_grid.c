@@ -11,11 +11,13 @@ void regular_grid(FILE *f, int dim, double start, double end, double step, int s
     int total_size = 1;
     int dim_size = (int) (end - start)/step + 1;
 
-    total_size = pow(dim_size, dim);
-
-    if(stop == 0){
-        stop = total_size + 10;
+    if(stop != 0){
+        total_size = stop;
     }
+    else{
+        total_size = pow(dim_size, dim);
+    }
+
 
     int index;
     
@@ -43,16 +45,20 @@ int main(int argc, char *argv[]){
     }
     
     FILE *f = fopen(argv[1], "w");
-    int dimsize = atoi(argv[2]);
-    int d = atoi(argv[3]);
-
-    int n = pow(dimsize, d);
     int stop = 0;
-    int k = pow(3, d);
-
+    int k;
+    int d = atoi(argv[3]);
+    int dimsize = atoi(argv[2]);
+    int n;
+    
     if(argc > 4){
         stop = atoi(argv[4]);
         k = 5;
+        n = stop;
+    }
+    else{
+        k = pow(3, d);
+        n = pow(dimsize, d);
     }
 
     fprintf(f, "%d %d %d\n", n, d, k);

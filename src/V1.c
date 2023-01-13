@@ -10,7 +10,7 @@
 #include <string.h> //memcpy
 
 //Max size of array D (same as V0)
-#define MAXSIZE 1024 * 1024 * 256l
+#define MAXSIZE 1024 * 1024 * 128l
 
 knnresult distrAllkNN(double * X, int n, int d, int k, int N){
     

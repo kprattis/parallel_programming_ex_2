@@ -8,7 +8,7 @@
 #include <cilk/cilk.h> //cilk for
 
 //Max size of array D
-#define MAXSIZE 1024 * 1024 * 256l
+#define MAXSIZE 1024 * 1024 * 128l
 
 knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
 
