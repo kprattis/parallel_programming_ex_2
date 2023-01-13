@@ -13,6 +13,7 @@ chmod +x bash_scripts/*
 module load gcc/9.4.0
 
 make bin/reg_grid CC=gcc
+make bin/test CC=gcc
 
 module load gcc/9.4.0 openmpi/4.1.2
 
