@@ -2,7 +2,6 @@
 
 #include <stdio.h> //File handling, print
 #include <cblas.h> //cblas_dgemm
-#include <math.h> //pow
 #include <stdlib.h> //malloc, free
 #include <sys/time.h> //execution time
 #include <cilk/cilk_api.h> //number of cilk workers
@@ -94,8 +93,7 @@ int main(int argc, char *argv[]){
         printf("Processing file %s\n", argv[1]);
         
         //--------------------------Read FILE-----------------
-        fscanf(f, "%d %d\n", &n, &d);
-        k = pow(3, d);
+        fscanf(f, "%d %d %d\n", &n, &d, &k);
         m = n;
 
         X = (double *) malloc(sizeof(double) * m * d);

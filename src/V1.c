@@ -2,7 +2,6 @@
 
 #include <stdio.h> //print, File
 #include <cblas.h>// cblas_dgemm
-#include <math.h> //pow
 #include <mpi.h> //MPI_Send ..
 #include <stdlib.h> //malloc ..
 #include <sys/time.h> //Execution time
@@ -181,33 +180,32 @@ int main(int argc, char *argv[]){
 
     //the process 0 will read the file and distribute it with MPI_Send to the other processes. Then it reopens the file and reads the first points as its own.
 
-    //==========First read and send the size N and the dimension d ============
+    //==========First read and send the size N and the dimension d and k ============
     if(tid == 0){
         f = fopen(argv[1], "r");
         if(f == NULL){
             printf("Could not open file %s\n", argv[1]);
             MPI_Abort( MPI_COMM_WORLD, 1);
         }
-        fscanf(f, "%d %d\n", &N, &d);
+        fscanf(f, "%d %d %d\n", &N, &d, &k);
         fclose(f);
 
         for(int i = 1; i < numtasks; i++){
             MPI_Send(&N, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
             MPI_Send(&d, 1, MPI_INT, i, 1, MPI_COMM_WORLD);
+            MPI_Send(&k, 1, MPI_INT, i, 2, MPI_COMM_WORLD);
         }
     }
     else{
         //Receive the sizes
         MPI_Recv(&N, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &mpistat);
         MPI_Recv(&d, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &mpistat);
+        MPI_Recv(&k, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &mpistat);
     }
     //======================================================================
     
     //Wait for everyone to reach here
     MPI_Barrier(MPI_COMM_WORLD);
-
-    //set k
-    k = pow(3, d);
 
     //Initialize according to id
     int chunk = N / numtasks;

@@ -63,12 +63,13 @@ int isexternal(int id, int N, int d){
 int test_result(FILE *fin, FILE *fout){
     int iscorrect = 1;
     
-    //scan the size and dimension
+    //scan the size and dimension and k
     int N, d;
+    int k;
     int idx, count;
 
     double temp;
-    fscanf(fin, "%d %d\n", &N, &d);
+    fscanf(fin, "%d %d %d\n", &N, &d, &k);
     char c = ' ';
     while(c != '\n'){
         fscanf(fout, "%c", &c);
@@ -84,8 +85,6 @@ int test_result(FILE *fin, FILE *fout){
         comb[i] = fact[d] / (fact[d - i] * fact[i]);
 
     free(fact);
-
-    int k = pow(3, d);
 
     double *D = (double *)malloc(k * sizeof(double));
 
