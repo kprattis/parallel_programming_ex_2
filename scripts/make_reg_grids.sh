@@ -1,5 +1,8 @@
 #!/bin/bash
 
+mkdir -p inputs
+mkdir -p results
+
 dims=(2 3 )
 sizes=(10 25 50 75 100 )
 
