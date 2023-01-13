@@ -41,7 +41,7 @@ bin/reg_grid: $(SRC)/reg_grid.c
 
 bin/test: $(SRC)/test_results.c
 	mkdir -p $(BIN) 
-	gcc -O3 $^ -o $@ -lm
+	gcc -O3 -Wno-unused-result $^ -o $@ -lm
 
 test: $(BIN)/test
 	$(BIN)/test $(IFILE) $(OFILE)
