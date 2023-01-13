@@ -60,7 +60,6 @@ $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	$(CC) -I$(HPCBLASINC) -L$(LBLAS) $(CFLAGS) $^ $(LFLAGS) -o $@  
 
 $(BIN)/knn_mpi: $(OBJFILES) $(SRC)/V1.c
-	export OMPI_CC=$(CC)
 	mkdir -p $(BIN)
 	mpicc -I$(HPCBLASINC) -L$(LBLAS) $(CFLAGS) $^ -L$(LBLAS) $(LFLAGS) -o $@ 
 	

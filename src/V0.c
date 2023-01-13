@@ -20,7 +20,7 @@ knnresult kNN(double *X, double *Y, int n, int m, int d, int k){
       BLOCKSIZE /= m;   
     }
 
-    printf("Distance Matrix Allocation => corpus Blocksize = %ld. Calculating %d nearest neighbors...\n" BLOCKSIZE, k);
+    printf("Distance Matrix Allocation => corpus Blocksize = %ld. Calculating %d nearest neighbors...\n", BLOCKSIZE, k);
     if(BLOCKSIZE < k){
         printf("Error: too large sizes m = %d, n = %d or Blocksize < k.\n", m, n);
         exit(1);
