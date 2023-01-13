@@ -53,7 +53,7 @@ seqrun: $(BIN)/knn
 	$(BIN)/knn $(IFILE) $(OFILE)
 
 mpirun: $(BIN)/knn_mpi
-	CILK_NWORKERS=1 mpiexec -n $(NPROCS) $^ $(IFILE) $(OFILE)
+	CILK_NWORKERS=2 mpiexec -n $(NPROCS) $^ $(IFILE) $(OFILE)
 
 $(BIN)/knn: $(OBJFILES) $(SRC)/V0.c
 	mkdir -p $(BIN)
