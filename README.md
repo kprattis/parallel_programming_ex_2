@@ -24,3 +24,13 @@ export OMPI_CC=clang
 make mpi CC=clang HPCBLASINC="$OPENBLAS_ROOT/include" LBLAS=$OPENBLAS_ROOT/lib
 
 `````````````
+
+`````````````
+sbatch scripts/mpi_batch.sh
+
+`````````````
+
+`````````````
+sbatch scripts/sbatch_run_grids.sh
+
+`````````````
