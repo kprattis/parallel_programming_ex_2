@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dims=( 2 3 )
+dims=(2 3 )
 sizes=(10 25 50 75 100 )
 
 for d in "${dims[@]}"
