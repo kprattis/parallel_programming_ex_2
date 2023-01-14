@@ -40,6 +40,9 @@ exoprt OMPI_CC="pathtoOpenCilk/clang"
 make CC="pathtoOpenCilk/clang"
 
 `````````````
+Make sure to use the absolute path (not . or ..) at OMPI_CC.
+
+
 * There should be created a bin folder containing the binary files:
     * **reg_grid**:
         Use this to produce a regular grid of **d** dimensions and **N** values per dimension and save it at a file. k will be $ 3^d $. You can either use:    
